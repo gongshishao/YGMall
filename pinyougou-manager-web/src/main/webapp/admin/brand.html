@@ -54,9 +54,14 @@
                 );
             }
 
-            //增加品牌数据
+            //增加品牌数据,*****注：因为与修改是同一编辑窗口，所以先进行方法判断，根据点击打开时是否附带id
             $scope.save = function () {
-                $http.post("../brand/addBrand.do", $scope.entity).success(
+                var methodName = "addBrand";
+                if ($scope.entity.id != null) {
+                    methodName = "update";
+                }
+                $http.post("../brand/"+methodName+".do", $scope.entity).success(
+
                     function (response) {
                         if (response.success) {
                             alert(response.message);
@@ -72,14 +77,37 @@
             $scope.findOne=function (id) {
                 $http.post("../brand/findOne.do?id="+id).success(
                     function (response) {
-                            $scope.reloadList();//重新加载
+                            $scope.entity=response;
                     }
                 );
             }
 
 
-
-
+            //获得需要批量删除的ids数组
+            $scope.selectIds=[];
+            $scope.updateSelection=function ($event,id) {
+                //$event.target获得的是checkbox的input节点
+                if ($event.target.checked) {//选中则添加到数组中
+                    $scope.selectIds.push(id);
+                } else {
+                    var index = $scope.selectIds.indexOf(id);//查找值的位置
+                    $scope.selectIds.splice(index, 1);//splice移除数组中的元素，参数1：移除的位置，参数2：移除的个数
+                }
+            }
+            //批量删除操作
+            $scope.dele=function () {
+                $http.get("../brand/delete.do?ids="+$scope.selectIds).success(
+                    function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            $scope.reloadList();//重新加载
+                        } else {
+                            alert(response.message);
+                        }
+                })
+                
+            }
+            
 
         })
 
@@ -102,10 +130,11 @@
         <div class="pull-left">
             <div class="form-group form-inline">
                 <div class="btn-group">
+                    <!--ng-click="entity={}"表示每次点击新建都会清空新建表单中之前的数据-->
                     <button type="button" class="btn btn-default" title="新建" data-toggle="modal"
                             data-target="#editModal"  ng-click="entity={}"><i class="fa fa-file-o"></i> 新建
                     </button>
-                    <button type="button" class="btn btn-default" title="删除"><i class="fa fa-trash-o"></i> 删除</button>
+                    <button type="button" class="btn btn-default" title="删除" ng-click="dele()"><i class="fa fa-trash-o"></i> 删除</button>
                     <button type="button" class="btn btn-default" title="刷新" onclick="window.location.reload();"><i
                             class="fa fa-refresh"></i> 刷新
                     </button>
@@ -134,7 +163,8 @@
             </thead>
             <tbody>
             <tr ng-repeat="entity in list">
-                <td><input type="checkbox"></td>
+                <!--￥event标记该input标签的源-->
+                <td><input type="checkbox" ng-click="updateSelection($event,entity.id)"></td>
                 <td>{{entity.id}}</td>
                 <td>{{entity.name}}</td>
                 <td>{{entity.firstChar}}</td>
@@ -154,7 +184,10 @@
 </div>
 <!-- /.box-body -->
 
-<!-- 编辑窗口 -->
+<!--
+    编辑窗口
+     data-target="#editModal"所指向的编辑窗口
+     -->
 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

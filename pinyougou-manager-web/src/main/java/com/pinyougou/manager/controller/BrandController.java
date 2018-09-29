@@ -3,7 +3,6 @@ package com.pinyougou.manager.controller;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.pinyougou.pojo.TbBrand;
 import com.pinyougou.sellergoods.service.BrandService;
-import com.sun.org.apache.regexp.internal.RE;
 import entity.PageResult;
 import entity.Result;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,28 +38,62 @@ public class BrandController {
     }
 
     /**
-     * 增加品牌
-     * @param brand
+     * 根据id查询品牌信息
+     * @param id
      * @return
      */
-    @RequestMapping("/addBrand")
-    public Result addBrand(@RequestBody TbBrand brand) {
-        Result result = new Result(true, "增加成功");
-        try {
-            brandService.addBrand(brand);
-            return result;
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.setSuccess(false);
-            result.setMessage("增加失败");
-            return  result;
-        }
-    }
-
     @RequestMapping("/findOne")
     public TbBrand findOne(Long id) {
         return brandService.findOne(id);
     }
 
+    //***************************************除查询外，增加，删除，修改都需要捕捉异常并提示操作结果,返回值为Result********************
+    /**
+     * 增加品牌
+     * @param brand     -- 品牌
+     * @return
+     */
+    @RequestMapping("/addBrand")
+    public Result addBrand(@RequestBody TbBrand brand) {
+        try {
+            brandService.addBrand(brand);
+            return new Result(true, "增加成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(false, "增加失败");
+        }
+    }
+
+    /**
+     * 更新品牌信息
+     * @param brand
+     * @return
+     */
+    @RequestMapping("/update")
+    public Result upadate(@RequestBody TbBrand brand) {
+        try {
+            brandService.updateById(brand);
+            return new Result(true, "修改成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(false,"修改失败");
+        }
+    }
+
+    /**
+     * 根据id批量删除品牌信息
+     * @param ids
+     * @return
+     */
+    @RequestMapping("/delete")
+    public Result delete(Long[] ids) {
+        try {
+            brandService.deleteByIds(ids);
+            return new Result(true, "删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(false,"删除失败");
+        }
+    }
 
 }
