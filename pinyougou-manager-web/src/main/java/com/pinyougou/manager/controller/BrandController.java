@@ -59,7 +59,7 @@ public class BrandController {
 
     @RequestMapping("/findOne")
     public TbBrand findOne(Long id) {
-        return  null;
+        return brandService.findOne(id);
     }
 
 

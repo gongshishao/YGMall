@@ -45,8 +45,22 @@ public class BrandServiceImpl implements BrandService {
         return new PageResult(page.getTotal(),page.getResult());
     }
 
+    /**
+     * 新增品牌
+     * @param brand
+     */
     @Override
     public void addBrand(TbBrand brand) {
         brandMapper.insert(brand);
+    }
+
+    /**
+     * 根据id查询品牌
+     * @param id
+     * @return
+     */
+    @Override
+    public TbBrand findOne(Long id) {
+        return brandMapper.selectByPrimaryKey(id);
     }
 }
