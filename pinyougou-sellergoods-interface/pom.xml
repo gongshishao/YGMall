@@ -10,7 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>pinyougou-sellergoods-interface</artifactId>
-    <packaging>jar</packaging>
     <!--依赖pojo-->
     <dependencies>
         <dependency>

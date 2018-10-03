@@ -42,11 +42,11 @@
 
             //分页重新载入
             $scope.reloadList = function () {
-                $scope.findByPage($scope.paginationConf.currentPage, $scope.paginationConf.itemsPerPage);
+                $scope.search($scope.paginationConf.currentPage, $scope.paginationConf.itemsPerPage);
             }
             //分页
             $scope.findByPage = function (pageNum, pageSize) {
-                $http.get("../brand/findByPage.do?pageNum=" + pageNum + "&pageSize=" + pageSize + "").success(
+                $http.get("../brand/findByPage.do?pageNum=" + pageNum + "&pageSize=" + pageSize).success(
                     function (response) {
                         $scope.list = response.rows;//获得当前页数据,对应PageResult中的rows
                         $scope.paginationConf.totalItems = response.total;//更新总记录数,对应PageResult中的total
@@ -61,7 +61,6 @@
                     methodName = "update";
                 }
                 $http.post("../brand/"+methodName+".do", $scope.entity).success(
-
                     function (response) {
                         if (response.success) {
                             alert(response.message);
@@ -105,7 +104,17 @@
                             alert(response.message);
                         }
                 })
-                
+            }
+
+            //条件查询
+            $scope.searchEntity={};
+            $scope.search=function (pageNum, pageSize) {
+                $http.post("../brand/search.do?pageNum=" + pageNum + "&pageSize=" + pageSize ,$scope.searchEntity).success(
+                    function (response) {
+                        $scope.list = response.rows;//获得当前页数据,对应PageResult中的rows
+                        $scope.paginationConf.totalItems = response.total;//更新总记录数,对应PageResult中的total
+                    }
+                );
             }
             
 
@@ -138,15 +147,14 @@
                     <button type="button" class="btn btn-default" title="刷新" onclick="window.location.reload();"><i
                             class="fa fa-refresh"></i> 刷新
                     </button>
-
-                    品牌名称:<input type="text" placeholder="请输入品牌名称" align="right">
-                    品牌首字母:<input type="text" placeholder="请输入品牌首字母" align="right">
                 </div>
             </div>
         </div>
         <div class="box-tools pull-right">
             <div class="has-feedback">
-
+                品牌名称:<input ng-model="searchEntity.name" placeholder="请输入品牌名称">
+                品牌首字母:<input ng-model="searchEntity.firstChar" placeholder="请输入品牌首字母">
+                <button ng-click="reloadList()" class="btn btn-default">查询</button>
             </div>
         </div>
         <!--工具栏/-->

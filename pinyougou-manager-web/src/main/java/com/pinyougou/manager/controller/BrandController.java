@@ -14,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/brand")
 public class BrandController {
+    //调用远程服务使用reference关联注解
     @Reference
     private BrandService brandService;
 
@@ -95,5 +96,18 @@ public class BrandController {
             return new Result(false,"删除失败");
         }
     }
+
+    /**
+     *   分页查询返回全部列表
+     * @param pageNum   --当前页码
+     * @param pageSize  --每页显示数量
+     * @return
+     */
+    @RequestMapping("/search")
+    public PageResult search(@RequestBody TbBrand brand,int pageNum,int pageSize) {
+        return brandService.findByPage(brand,pageNum, pageSize);
+    }
+
+
 
 }

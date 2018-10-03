@@ -5,10 +5,11 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.pinyougou.mapper.TbBrandMapper;
 import com.pinyougou.pojo.TbBrand;
+import com.pinyougou.pojo.TbBrandExample;
+import com.pinyougou.pojo.TbBrandExample.Criteria;
 import com.pinyougou.sellergoods.service.BrandService;
 import entity.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,7 +17,6 @@ import java.util.List;
  * 品牌模块服务层实现类
  */
 @Service
-@Transactional
 public class BrandServiceImpl implements BrandService {
 
     //注入mapper数据访问对象
@@ -82,5 +82,22 @@ public class BrandServiceImpl implements BrandService {
         for (Long id : ids) {
             brandMapper.deleteByPrimaryKey(id);
         }
+    }
+
+    @Override
+    public PageResult findByPage(TbBrand brand, int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum, pageSize); //pagehelper    mybatis分页插件,在数据访问层dao引入的插件
+        TbBrandExample example = new TbBrandExample();//创建实例对象
+        Criteria criteria = example.createCriteria();
+        if (brand!=null) {
+            if (brand.getName() != null && brand.getName().length() > 0) {
+                criteria.andNameLike("%"+brand.getName()+"%");//添加名字模糊查询
+            }
+            if (brand.getFirstChar() != null && brand.getFirstChar().length() > 0) {
+                criteria.andFirstCharLike("%" + brand.getFirstChar()+"%");
+            }
+        }
+        Page<TbBrand> page = (Page<TbBrand>) brandMapper.selectByExample(example);//Page   mybatis分页对象
+        return new PageResult(page.getTotal(),page.getResult());
     }
 }
