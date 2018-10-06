@@ -19,12 +19,13 @@
     <!--引入前端分层js-->
     <script type="text/javascript" src="../js/base_pagination.js">  </script>
     <script type="text/javascript" src="../js/service/brandService.js">  </script>
+    <script type="text/javascript" src="../js/controller/baseController.js"></script>
     <script type="text/javascript" src="../js/controller/brandController.js">  </script>
 
 
     <!--编写angularJS代码-->
-    <script>
-        var app = angular.module("pinyougou", ["pagination"]);//添加分页js中的品优购模块
+    <!--<script>
+       /* var app = angular.module("pinyougou", ["pagination"]);//添加分页js中的品优购模块
         //通过内置服务$http进行服务器数据访问,配置body标签中的ng-init初始化调用方法,进行类似ajax的数据访问请求
         app.controller("brandController", function ($scope, $http) {
             //查询列表数据绑定到表单中
@@ -33,9 +34,9 @@
                     function (response) {
                         $scope.list = response;
                     });
-            }
+            }*/
             //分页控件配置
-            $scope.paginationConf = {
+            /*$scope.paginationConf = {
                 currentPage: 1,//当前页码,初始值为1
                 totalItems: 10,//总记录数
                 itemsPerPage: 10,//初始每页显示数量
@@ -43,23 +44,23 @@
                 onChange: function () {
                     $scope.reloadList();//重新加载
                 }
-            }
+            }*/
 
             //分页重新载入
-            $scope.reloadList = function () {
+            /*$scope.reloadList = function () {
                 $scope.search($scope.paginationConf.currentPage, $scope.paginationConf.itemsPerPage);
-            }
+            }*/
             //分页
-            $scope.findByPage = function (pageNum, pageSize) {
+            /*$scope.findByPage = function (pageNum, pageSize) {
                 $http.get("../brand/findByPage.do?pageNum=" + pageNum + "&pageSize=" + pageSize).success(
                     function (response) {
                         $scope.list = response.rows;//获得当前页数据,对应PageResult中的rows
                         $scope.paginationConf.totalItems = response.total;//更新总记录数,对应PageResult中的total
                     }
                 );
-            }
+            }*/
 
-            //增加品牌数据,*****注：因为与修改是同一编辑窗口，所以先进行方法判断，根据点击打开时是否附带id
+           /* //增加品牌数据,*****注：因为与修改是同一编辑窗口，所以先进行方法判断，根据点击打开时是否附带id
             $scope.save = function () {
                 var methodName = "addBrand";
                 if ($scope.entity.id != null) {
@@ -76,19 +77,19 @@
                     }
                 );
             }
-
+*/
             //点击修改按钮时根据scope域中的id查询当前商品
-            $scope.findOne=function (id) {
+            /*$scope.findOne=function (id) {
                 $http.post("../brand/findOne.do?id="+id).success(
                     function (response) {
                             $scope.entity=response;
                     }
                 );
-            }
+            }*/
 
 
             //获得需要批量删除的ids数组
-            $scope.selectIds=[];
+           /* $scope.selectIds=[];
             $scope.updateSelection=function ($event,id) {
                 //$event.target获得的是checkbox的input节点
                 if ($event.target.checked) {//选中则添加到数组中
@@ -109,10 +110,10 @@
                             alert(response.message);
                         }
                 })
-            }
+            }*/
 
             //条件查询
-            $scope.searchEntity={};
+            /*$scope.searchEntity={};
             $scope.search=function (pageNum, pageSize) {
                 $http.post("../brand/search.do?pageNum=" + pageNum + "&pageSize=" + pageSize ,$scope.searchEntity).success(
                     function (response) {
@@ -123,9 +124,9 @@
             }
             
 
-        })
+        })*/
 
-    </script>
+    </script>-->
 
 </head>
 <!--在body标签中引入模板,以及引入控制器,以及初始化调用findAll()-->
