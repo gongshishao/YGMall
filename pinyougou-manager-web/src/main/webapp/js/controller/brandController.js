@@ -8,5 +8,5 @@ app.controller('brandController' ,function($scope,brandService){
             }
         );
     }
-    //其它方法省略........
+
 });
