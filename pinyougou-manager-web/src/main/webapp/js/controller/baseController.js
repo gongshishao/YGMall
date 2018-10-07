@@ -1,4 +1,4 @@
- //品牌控制层 
+ //品牌控制层,最通用的控制器继承
 app.controller('baseController' ,function($scope){	
 	
     //重新加载列表 数据

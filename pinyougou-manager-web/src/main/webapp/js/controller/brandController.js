@@ -1,6 +1,6 @@
 //品牌控制层
 app.controller('brandController' ,function($scope,$controller,brandService){
-    $controller('baseController',{$scope:$scope});//继承baseController.js
+    $controller('baseController',{$scope:$scope});//继承baseController.js,伪继承
 
     //读取列表数据绑定到表单中
     $scope.findAll=function(){
