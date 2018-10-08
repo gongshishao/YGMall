@@ -1,20 +1,20 @@
 package com.pinyougou.sellergoods.service.impl;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.github.abel533.entity.Example;
+import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.pinyougou.mapper.TbGoodsDescMapper;
 import com.pinyougou.pojo.TbGoodsDesc;
-import com.pinyougou.pojo.TbGoodsDescExample;
-import com.pinyougou.pojo.TbGoodsDescExample.Criteria;
 import com.pinyougou.sellergoods.service.GoodsDescService;
-
 import entity.PageResult;
 
 /**
- * 服务实现层
- * @author Administrator
+ * 业务逻辑实现
+ * @author Steven
  *
  */
 @Service
@@ -28,7 +28,7 @@ public class GoodsDescServiceImpl implements GoodsDescService {
 	 */
 	@Override
 	public List<TbGoodsDesc> findAll() {
-		return goodsDescMapper.selectByExample(null);
+		return goodsDescMapper.select(null);
 	}
 
 	/**
@@ -36,9 +36,20 @@ public class GoodsDescServiceImpl implements GoodsDescService {
 	 */
 	@Override
 	public PageResult findPage(int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);		
-		Page<TbGoodsDesc> page=   (Page<TbGoodsDesc>) goodsDescMapper.selectByExample(null);
-		return new PageResult(page.getTotal(), page.getResult());
+		
+		PageResult<TbGoodsDesc> result = new PageResult<TbGoodsDesc>();
+        //设置分页条件
+        PageHelper.startPage(pageNum, pageSize);
+
+        //查询数据
+        List<TbGoodsDesc> list = goodsDescMapper.select(null);
+        //保存数据列表
+        result.setRows(list);
+
+        //获取总记录数
+        PageInfo<TbGoodsDesc> info = new PageInfo<TbGoodsDesc>(list);
+        result.setTotal(info.getTotal());
+		return result;
 	}
 
 	/**
@@ -46,7 +57,7 @@ public class GoodsDescServiceImpl implements GoodsDescService {
 	 */
 	@Override
 	public void add(TbGoodsDesc goodsDesc) {
-		goodsDescMapper.insert(goodsDesc);		
+		goodsDescMapper.insertSelective(goodsDesc);		
 	}
 
 	
@@ -55,7 +66,7 @@ public class GoodsDescServiceImpl implements GoodsDescService {
 	 */
 	@Override
 	public void update(TbGoodsDesc goodsDesc){
-		goodsDescMapper.updateByPrimaryKey(goodsDesc);
+		goodsDescMapper.updateByPrimaryKeySelective(goodsDesc);
 	}	
 	
 	/**
@@ -73,43 +84,66 @@ public class GoodsDescServiceImpl implements GoodsDescService {
 	 */
 	@Override
 	public void delete(Long[] ids) {
-		for(Long id:ids){
-			goodsDescMapper.deleteByPrimaryKey(id);
-		}		
+		//数组转list
+        List longs = Arrays.asList(ids);
+        //构建查询条件
+        Example example = new Example(TbGoodsDesc.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andIn("id", longs);
+
+        //跟据查询条件删除数据
+        goodsDescMapper.deleteByExample(example);
 	}
 	
 	
-		@Override
+	@Override
 	public PageResult findPage(TbGoodsDesc goodsDesc, int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);
-		
-		TbGoodsDescExample example=new TbGoodsDescExample();
-		Criteria criteria = example.createCriteria();
+		PageResult<TbGoodsDesc> result = new PageResult<TbGoodsDesc>();
+        //设置分页条件
+        PageHelper.startPage(pageNum, pageSize);
+
+        //构建查询条件
+        Example example = new Example(TbGoodsDesc.class);
+        Example.Criteria criteria = example.createCriteria();
 		
 		if(goodsDesc!=null){			
-						if(goodsDesc.getIntroduction()!=null && goodsDesc.getIntroduction().length()>0){
-				criteria.andIntroductionLike("%"+goodsDesc.getIntroduction()+"%");
+						//如果字段不为空
+			if (goodsDesc.getIntroduction()!=null && goodsDesc.getIntroduction().length()>0) {
+				criteria.andLike("introduction", "%" + goodsDesc.getIntroduction() + "%");
 			}
-			if(goodsDesc.getSpecificationItems()!=null && goodsDesc.getSpecificationItems().length()>0){
-				criteria.andSpecificationItemsLike("%"+goodsDesc.getSpecificationItems()+"%");
+			//如果字段不为空
+			if (goodsDesc.getSpecificationItems()!=null && goodsDesc.getSpecificationItems().length()>0) {
+				criteria.andLike("specificationItems", "%" + goodsDesc.getSpecificationItems() + "%");
 			}
-			if(goodsDesc.getCustomAttributeItems()!=null && goodsDesc.getCustomAttributeItems().length()>0){
-				criteria.andCustomAttributeItemsLike("%"+goodsDesc.getCustomAttributeItems()+"%");
+			//如果字段不为空
+			if (goodsDesc.getCustomAttributeItems()!=null && goodsDesc.getCustomAttributeItems().length()>0) {
+				criteria.andLike("customAttributeItems", "%" + goodsDesc.getCustomAttributeItems() + "%");
 			}
-			if(goodsDesc.getItemImages()!=null && goodsDesc.getItemImages().length()>0){
-				criteria.andItemImagesLike("%"+goodsDesc.getItemImages()+"%");
+			//如果字段不为空
+			if (goodsDesc.getItemImages()!=null && goodsDesc.getItemImages().length()>0) {
+				criteria.andLike("itemImages", "%" + goodsDesc.getItemImages() + "%");
 			}
-			if(goodsDesc.getPackageList()!=null && goodsDesc.getPackageList().length()>0){
-				criteria.andPackageListLike("%"+goodsDesc.getPackageList()+"%");
+			//如果字段不为空
+			if (goodsDesc.getPackageList()!=null && goodsDesc.getPackageList().length()>0) {
+				criteria.andLike("packageList", "%" + goodsDesc.getPackageList() + "%");
 			}
-			if(goodsDesc.getSaleService()!=null && goodsDesc.getSaleService().length()>0){
-				criteria.andSaleServiceLike("%"+goodsDesc.getSaleService()+"%");
+			//如果字段不为空
+			if (goodsDesc.getSaleService()!=null && goodsDesc.getSaleService().length()>0) {
+				criteria.andLike("saleService", "%" + goodsDesc.getSaleService() + "%");
 			}
 	
 		}
+
+        //查询数据
+        List<TbGoodsDesc> list = goodsDescMapper.selectByExample(example);
+        //保存数据列表
+        result.setRows(list);
+
+        //获取总记录数
+        PageInfo<TbGoodsDesc> info = new PageInfo<TbGoodsDesc>(list);
+        result.setTotal(info.getTotal());
 		
-		Page<TbGoodsDesc> page= (Page<TbGoodsDesc>)goodsDescMapper.selectByExample(example);		
-		return new PageResult(page.getTotal(), page.getResult());
+		return result;
 	}
 	
 }

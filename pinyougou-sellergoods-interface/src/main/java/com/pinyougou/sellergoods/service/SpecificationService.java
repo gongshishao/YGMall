@@ -5,8 +5,8 @@ import com.pinyougou.pojo.TbSpecification;
 import com.pinyougou.pojogroup.Specification;
 import entity.PageResult;
 /**
- * 服务层接口
- * @author Administrator
+ * 业务逻辑接口
+ * @author Steven
  *
  */
 public interface SpecificationService {
@@ -26,7 +26,7 @@ public interface SpecificationService {
 	
 	
 	/**
-	 * 增加,使用规格和规格选项的包装类
+	 * 增加,规格和规格列表的包装类
 	*/
 	public void add(Specification specification);
 	
@@ -34,11 +34,11 @@ public interface SpecificationService {
 	/**
 	 * 修改
 	 */
-	public void update(TbSpecification specification);
+	public void update(Specification specification);
 	
 
 	/**
-	 * 根据ID获取实体
+	 * 根据ID获取实体,规格和规格列表的包装类
 	 * @param id
 	 * @return
 	 */

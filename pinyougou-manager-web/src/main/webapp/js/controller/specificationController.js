@@ -42,7 +42,8 @@ app.controller('specificationController' ,function($scope,$controller   ,specifi
 		serviceObject.success(
 			function(response){
 				if(response.success){
-					//重新查询 
+					//重新查询
+                    alert(response.message);
 		        	$scope.reloadList();//重新加载
 				}else{
 					alert(response.message);
@@ -58,6 +59,7 @@ app.controller('specificationController' ,function($scope,$controller   ,specifi
 		specificationService.dele( $scope.selectIds ).success(
 			function(response){
 				if(response.success){
+                    alert(response.message);
 					$scope.reloadList();//刷新列表
 					$scope.selectIds=[];
 				}						

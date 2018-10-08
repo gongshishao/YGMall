@@ -1,20 +1,20 @@
 package com.pinyougou.sellergoods.service.impl;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.github.abel533.entity.Example;
+import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.pinyougou.mapper.TbTypeTemplateMapper;
 import com.pinyougou.pojo.TbTypeTemplate;
-import com.pinyougou.pojo.TbTypeTemplateExample;
-import com.pinyougou.pojo.TbTypeTemplateExample.Criteria;
 import com.pinyougou.sellergoods.service.TypeTemplateService;
-
 import entity.PageResult;
 
 /**
- * 服务实现层
- * @author Administrator
+ * 业务逻辑实现
+ * @author Steven
  *
  */
 @Service
@@ -28,7 +28,7 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 	 */
 	@Override
 	public List<TbTypeTemplate> findAll() {
-		return typeTemplateMapper.selectByExample(null);
+		return typeTemplateMapper.select(null);
 	}
 
 	/**
@@ -36,9 +36,20 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 	 */
 	@Override
 	public PageResult findPage(int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);		
-		Page<TbTypeTemplate> page=   (Page<TbTypeTemplate>) typeTemplateMapper.selectByExample(null);
-		return new PageResult(page.getTotal(), page.getResult());
+		
+		PageResult<TbTypeTemplate> result = new PageResult<TbTypeTemplate>();
+        //设置分页条件
+        PageHelper.startPage(pageNum, pageSize);
+
+        //查询数据
+        List<TbTypeTemplate> list = typeTemplateMapper.select(null);
+        //保存数据列表
+        result.setRows(list);
+
+        //获取总记录数
+        PageInfo<TbTypeTemplate> info = new PageInfo<TbTypeTemplate>(list);
+        result.setTotal(info.getTotal());
+		return result;
 	}
 
 	/**
@@ -46,7 +57,7 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 	 */
 	@Override
 	public void add(TbTypeTemplate typeTemplate) {
-		typeTemplateMapper.insert(typeTemplate);		
+		typeTemplateMapper.insertSelective(typeTemplate);		
 	}
 
 	
@@ -55,7 +66,7 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 	 */
 	@Override
 	public void update(TbTypeTemplate typeTemplate){
-		typeTemplateMapper.updateByPrimaryKey(typeTemplate);
+		typeTemplateMapper.updateByPrimaryKeySelective(typeTemplate);
 	}	
 	
 	/**
@@ -73,37 +84,58 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 	 */
 	@Override
 	public void delete(Long[] ids) {
-		for(Long id:ids){
-			typeTemplateMapper.deleteByPrimaryKey(id);
-		}		
+		//数组转list
+        List longs = Arrays.asList(ids);
+        //构建查询条件
+        Example example = new Example(TbTypeTemplate.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andIn("id", longs);
+
+        //跟据查询条件删除数据
+        typeTemplateMapper.deleteByExample(example);
 	}
 	
 	
-		@Override
+	@Override
 	public PageResult findPage(TbTypeTemplate typeTemplate, int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);
-		
-		TbTypeTemplateExample example=new TbTypeTemplateExample();
-		Criteria criteria = example.createCriteria();
+		PageResult<TbTypeTemplate> result = new PageResult<TbTypeTemplate>();
+        //设置分页条件
+        PageHelper.startPage(pageNum, pageSize);
+
+        //构建查询条件
+        Example example = new Example(TbTypeTemplate.class);
+        Example.Criteria criteria = example.createCriteria();
 		
 		if(typeTemplate!=null){			
-						if(typeTemplate.getName()!=null && typeTemplate.getName().length()>0){
-				criteria.andNameLike("%"+typeTemplate.getName()+"%");
+						//如果字段不为空
+			if (typeTemplate.getName()!=null && typeTemplate.getName().length()>0) {
+				criteria.andLike("name", "%" + typeTemplate.getName() + "%");
 			}
-			if(typeTemplate.getSpecIds()!=null && typeTemplate.getSpecIds().length()>0){
-				criteria.andSpecIdsLike("%"+typeTemplate.getSpecIds()+"%");
+			//如果字段不为空
+			if (typeTemplate.getSpecIds()!=null && typeTemplate.getSpecIds().length()>0) {
+				criteria.andLike("specIds", "%" + typeTemplate.getSpecIds() + "%");
 			}
-			if(typeTemplate.getBrandIds()!=null && typeTemplate.getBrandIds().length()>0){
-				criteria.andBrandIdsLike("%"+typeTemplate.getBrandIds()+"%");
+			//如果字段不为空
+			if (typeTemplate.getBrandIds()!=null && typeTemplate.getBrandIds().length()>0) {
+				criteria.andLike("brandIds", "%" + typeTemplate.getBrandIds() + "%");
 			}
-			if(typeTemplate.getCustomAttributeItems()!=null && typeTemplate.getCustomAttributeItems().length()>0){
-				criteria.andCustomAttributeItemsLike("%"+typeTemplate.getCustomAttributeItems()+"%");
+			//如果字段不为空
+			if (typeTemplate.getCustomAttributeItems()!=null && typeTemplate.getCustomAttributeItems().length()>0) {
+				criteria.andLike("customAttributeItems", "%" + typeTemplate.getCustomAttributeItems() + "%");
 			}
 	
 		}
+
+        //查询数据
+        List<TbTypeTemplate> list = typeTemplateMapper.selectByExample(example);
+        //保存数据列表
+        result.setRows(list);
+
+        //获取总记录数
+        PageInfo<TbTypeTemplate> info = new PageInfo<TbTypeTemplate>(list);
+        result.setTotal(info.getTotal());
 		
-		Page<TbTypeTemplate> page= (Page<TbTypeTemplate>)typeTemplateMapper.selectByExample(example);		
-		return new PageResult(page.getTotal(), page.getResult());
+		return result;
 	}
 	
 }

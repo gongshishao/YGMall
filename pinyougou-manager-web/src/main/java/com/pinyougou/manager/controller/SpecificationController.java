@@ -12,8 +12,8 @@ import com.pinyougou.sellergoods.service.SpecificationService;
 import entity.PageResult;
 import entity.Result;
 /**
- * controller
- * @author Administrator
+ * 请求处理器
+ * @author Steven
  *
  */
 @RestController
@@ -43,7 +43,7 @@ public class SpecificationController {
 	}
 	
 	/**
-	 * 增加,使用规格和规格选项的包装类
+	 * 增加
 	 * @param specification
 	 * @return
 	 */
@@ -64,7 +64,7 @@ public class SpecificationController {
 	 * @return
 	 */
 	@RequestMapping("/update")
-	public Result update(@RequestBody TbSpecification specification){
+	public Result update(@RequestBody Specification specification){
 		try {
 			specificationService.update(specification);
 			return new Result(true, "修改成功");
@@ -75,7 +75,7 @@ public class SpecificationController {
 	}	
 	
 	/**
-	 * 根据id获取实体,获得的是规格和规格列表的的包装实体类
+	 * 获取实体,规格和规格列表的包装类
 	 * @param id
 	 * @return
 	 */
@@ -100,7 +100,7 @@ public class SpecificationController {
 		}
 	}
 	
-		/**
+	/**
 	 * 查询+分页
 	 * @param specification
 	 * @param page

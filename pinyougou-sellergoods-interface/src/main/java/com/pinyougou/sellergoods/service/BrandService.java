@@ -22,7 +22,7 @@ public interface BrandService {
      * @param pageSize  --每页数量
      * @return
      */
-    public PageResult findByPage(int pageNum,int pageSize);
+    public PageResult<TbBrand> findByPage(int pageNum,int pageSize);
 
     /**
      * 增加品牌数据

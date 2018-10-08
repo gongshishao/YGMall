@@ -1,20 +1,20 @@
 package com.pinyougou.sellergoods.service.impl;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.github.abel533.entity.Example;
+import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.pinyougou.mapper.TbItemMapper;
 import com.pinyougou.pojo.TbItem;
-import com.pinyougou.pojo.TbItemExample;
-import com.pinyougou.pojo.TbItemExample.Criteria;
 import com.pinyougou.sellergoods.service.ItemService;
-
 import entity.PageResult;
 
 /**
- * 服务实现层
- * @author Administrator
+ * 业务逻辑实现
+ * @author Steven
  *
  */
 @Service
@@ -28,7 +28,7 @@ public class ItemServiceImpl implements ItemService {
 	 */
 	@Override
 	public List<TbItem> findAll() {
-		return itemMapper.selectByExample(null);
+		return itemMapper.select(null);
 	}
 
 	/**
@@ -36,9 +36,20 @@ public class ItemServiceImpl implements ItemService {
 	 */
 	@Override
 	public PageResult findPage(int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);		
-		Page<TbItem> page=   (Page<TbItem>) itemMapper.selectByExample(null);
-		return new PageResult(page.getTotal(), page.getResult());
+		
+		PageResult<TbItem> result = new PageResult<TbItem>();
+        //设置分页条件
+        PageHelper.startPage(pageNum, pageSize);
+
+        //查询数据
+        List<TbItem> list = itemMapper.select(null);
+        //保存数据列表
+        result.setRows(list);
+
+        //获取总记录数
+        PageInfo<TbItem> info = new PageInfo<TbItem>(list);
+        result.setTotal(info.getTotal());
+		return result;
 	}
 
 	/**
@@ -46,7 +57,7 @@ public class ItemServiceImpl implements ItemService {
 	 */
 	@Override
 	public void add(TbItem item) {
-		itemMapper.insert(item);		
+		itemMapper.insertSelective(item);		
 	}
 
 	
@@ -55,7 +66,7 @@ public class ItemServiceImpl implements ItemService {
 	 */
 	@Override
 	public void update(TbItem item){
-		itemMapper.updateByPrimaryKey(item);
+		itemMapper.updateByPrimaryKeySelective(item);
 	}	
 	
 	/**
@@ -73,64 +84,94 @@ public class ItemServiceImpl implements ItemService {
 	 */
 	@Override
 	public void delete(Long[] ids) {
-		for(Long id:ids){
-			itemMapper.deleteByPrimaryKey(id);
-		}		
+		//数组转list
+        List longs = Arrays.asList(ids);
+        //构建查询条件
+        Example example = new Example(TbItem.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andIn("id", longs);
+
+        //跟据查询条件删除数据
+        itemMapper.deleteByExample(example);
 	}
 	
 	
-		@Override
+	@Override
 	public PageResult findPage(TbItem item, int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);
-		
-		TbItemExample example=new TbItemExample();
-		Criteria criteria = example.createCriteria();
+		PageResult<TbItem> result = new PageResult<TbItem>();
+        //设置分页条件
+        PageHelper.startPage(pageNum, pageSize);
+
+        //构建查询条件
+        Example example = new Example(TbItem.class);
+        Example.Criteria criteria = example.createCriteria();
 		
 		if(item!=null){			
-						if(item.getTitle()!=null && item.getTitle().length()>0){
-				criteria.andTitleLike("%"+item.getTitle()+"%");
+						//如果字段不为空
+			if (item.getTitle()!=null && item.getTitle().length()>0) {
+				criteria.andLike("title", "%" + item.getTitle() + "%");
 			}
-			if(item.getSellPoint()!=null && item.getSellPoint().length()>0){
-				criteria.andSellPointLike("%"+item.getSellPoint()+"%");
+			//如果字段不为空
+			if (item.getSellPoint()!=null && item.getSellPoint().length()>0) {
+				criteria.andLike("sellPoint", "%" + item.getSellPoint() + "%");
 			}
-			if(item.getBarcode()!=null && item.getBarcode().length()>0){
-				criteria.andBarcodeLike("%"+item.getBarcode()+"%");
+			//如果字段不为空
+			if (item.getBarcode()!=null && item.getBarcode().length()>0) {
+				criteria.andLike("barcode", "%" + item.getBarcode() + "%");
 			}
-			if(item.getImage()!=null && item.getImage().length()>0){
-				criteria.andImageLike("%"+item.getImage()+"%");
+			//如果字段不为空
+			if (item.getImage()!=null && item.getImage().length()>0) {
+				criteria.andLike("image", "%" + item.getImage() + "%");
 			}
-			if(item.getStatus()!=null && item.getStatus().length()>0){
-				criteria.andStatusLike("%"+item.getStatus()+"%");
+			//如果字段不为空
+			if (item.getStatus()!=null && item.getStatus().length()>0) {
+				criteria.andLike("status", "%" + item.getStatus() + "%");
 			}
-			if(item.getItemSn()!=null && item.getItemSn().length()>0){
-				criteria.andItemSnLike("%"+item.getItemSn()+"%");
+			//如果字段不为空
+			if (item.getItemSn()!=null && item.getItemSn().length()>0) {
+				criteria.andLike("itemSn", "%" + item.getItemSn() + "%");
 			}
-			if(item.getIsDefault()!=null && item.getIsDefault().length()>0){
-				criteria.andIsDefaultLike("%"+item.getIsDefault()+"%");
+			//如果字段不为空
+			if (item.getIsDefault()!=null && item.getIsDefault().length()>0) {
+				criteria.andLike("isDefault", "%" + item.getIsDefault() + "%");
 			}
-			if(item.getSellerId()!=null && item.getSellerId().length()>0){
-				criteria.andSellerIdLike("%"+item.getSellerId()+"%");
+			//如果字段不为空
+			if (item.getSellerId()!=null && item.getSellerId().length()>0) {
+				criteria.andLike("sellerId", "%" + item.getSellerId() + "%");
 			}
-			if(item.getCartThumbnail()!=null && item.getCartThumbnail().length()>0){
-				criteria.andCartThumbnailLike("%"+item.getCartThumbnail()+"%");
+			//如果字段不为空
+			if (item.getCartThumbnail()!=null && item.getCartThumbnail().length()>0) {
+				criteria.andLike("cartThumbnail", "%" + item.getCartThumbnail() + "%");
 			}
-			if(item.getCategory()!=null && item.getCategory().length()>0){
-				criteria.andCategoryLike("%"+item.getCategory()+"%");
+			//如果字段不为空
+			if (item.getCategory()!=null && item.getCategory().length()>0) {
+				criteria.andLike("category", "%" + item.getCategory() + "%");
 			}
-			if(item.getBrand()!=null && item.getBrand().length()>0){
-				criteria.andBrandLike("%"+item.getBrand()+"%");
+			//如果字段不为空
+			if (item.getBrand()!=null && item.getBrand().length()>0) {
+				criteria.andLike("brand", "%" + item.getBrand() + "%");
 			}
-			if(item.getSpec()!=null && item.getSpec().length()>0){
-				criteria.andSpecLike("%"+item.getSpec()+"%");
+			//如果字段不为空
+			if (item.getSpec()!=null && item.getSpec().length()>0) {
+				criteria.andLike("spec", "%" + item.getSpec() + "%");
 			}
-			if(item.getSeller()!=null && item.getSeller().length()>0){
-				criteria.andSellerLike("%"+item.getSeller()+"%");
+			//如果字段不为空
+			if (item.getSeller()!=null && item.getSeller().length()>0) {
+				criteria.andLike("seller", "%" + item.getSeller() + "%");
 			}
 	
 		}
 
-		Page<TbItem> page= (Page<TbItem>)itemMapper.selectByExample(example);
-		return new PageResult(page.getTotal(), page.getResult());
+        //查询数据
+        List<TbItem> list = itemMapper.selectByExample(example);
+        //保存数据列表
+        result.setRows(list);
+
+        //获取总记录数
+        PageInfo<TbItem> info = new PageInfo<TbItem>(list);
+        result.setTotal(info.getTotal());
+		
+		return result;
 	}
 	
 }

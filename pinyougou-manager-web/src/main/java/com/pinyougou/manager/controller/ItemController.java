@@ -11,8 +11,8 @@ import com.pinyougou.sellergoods.service.ItemService;
 import entity.PageResult;
 import entity.Result;
 /**
- * controller
- * @author Administrator
+ * 请求处理器
+ * @author Steven
  *
  */
 @RestController
@@ -99,9 +99,9 @@ public class ItemController {
 		}
 	}
 	
-		/**
+	/**
 	 * 查询+分页
-	 * @param brand
+	 * @param item
 	 * @param page
 	 * @param rows
 	 * @return

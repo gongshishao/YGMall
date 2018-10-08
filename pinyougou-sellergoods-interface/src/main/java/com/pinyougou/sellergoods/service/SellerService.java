@@ -4,8 +4,8 @@ import com.pinyougou.pojo.TbSeller;
 
 import entity.PageResult;
 /**
- * 服务层接口
- * @author Administrator
+ * 业务逻辑接口
+ * @author Steven
  *
  */
 public interface SellerService {
@@ -41,14 +41,14 @@ public interface SellerService {
 	 * @param id
 	 * @return
 	 */
-	public TbSeller findOne(String id);
+	public TbSeller findOne(Long id);
 	
 	
 	/**
 	 * 批量删除
 	 * @param ids
 	 */
-	public void delete(String[] ids);
+	public void delete(Long[] ids);
 
 	/**
 	 * 分页

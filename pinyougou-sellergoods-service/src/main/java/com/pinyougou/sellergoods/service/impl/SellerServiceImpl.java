@@ -1,20 +1,20 @@
 package com.pinyougou.sellergoods.service.impl;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.github.abel533.entity.Example;
+import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.pinyougou.mapper.TbSellerMapper;
 import com.pinyougou.pojo.TbSeller;
-import com.pinyougou.pojo.TbSellerExample;
-import com.pinyougou.pojo.TbSellerExample.Criteria;
 import com.pinyougou.sellergoods.service.SellerService;
-
 import entity.PageResult;
 
 /**
- * 服务实现层
- * @author Administrator
+ * 业务逻辑实现
+ * @author Steven
  *
  */
 @Service
@@ -28,7 +28,7 @@ public class SellerServiceImpl implements SellerService {
 	 */
 	@Override
 	public List<TbSeller> findAll() {
-		return sellerMapper.selectByExample(null);
+		return sellerMapper.select(null);
 	}
 
 	/**
@@ -36,9 +36,20 @@ public class SellerServiceImpl implements SellerService {
 	 */
 	@Override
 	public PageResult findPage(int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);		
-		Page<TbSeller> page=   (Page<TbSeller>) sellerMapper.selectByExample(null);
-		return new PageResult(page.getTotal(), page.getResult());
+		
+		PageResult<TbSeller> result = new PageResult<TbSeller>();
+        //设置分页条件
+        PageHelper.startPage(pageNum, pageSize);
+
+        //查询数据
+        List<TbSeller> list = sellerMapper.select(null);
+        //保存数据列表
+        result.setRows(list);
+
+        //获取总记录数
+        PageInfo<TbSeller> info = new PageInfo<TbSeller>(list);
+        result.setTotal(info.getTotal());
+		return result;
 	}
 
 	/**
@@ -46,7 +57,7 @@ public class SellerServiceImpl implements SellerService {
 	 */
 	@Override
 	public void add(TbSeller seller) {
-		sellerMapper.insert(seller);		
+		sellerMapper.insertSelective(seller);		
 	}
 
 	
@@ -55,7 +66,7 @@ public class SellerServiceImpl implements SellerService {
 	 */
 	@Override
 	public void update(TbSeller seller){
-		sellerMapper.updateByPrimaryKey(seller);
+		sellerMapper.updateByPrimaryKeySelective(seller);
 	}	
 	
 	/**
@@ -64,7 +75,7 @@ public class SellerServiceImpl implements SellerService {
 	 * @return
 	 */
 	@Override
-	public TbSeller findOne(String id){
+	public TbSeller findOne(Long id){
 		return sellerMapper.selectByPrimaryKey(id);
 	}
 
@@ -72,92 +83,131 @@ public class SellerServiceImpl implements SellerService {
 	 * 批量删除
 	 */
 	@Override
-	public void delete(String[] ids) {
-		for(String id:ids){
-			sellerMapper.deleteByPrimaryKey(id);
-		}		
+	public void delete(Long[] ids) {
+		//数组转list
+        List longs = Arrays.asList(ids);
+        //构建查询条件
+        Example example = new Example(TbSeller.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andIn("id", longs);
+
+        //跟据查询条件删除数据
+        sellerMapper.deleteByExample(example);
 	}
 	
 	
-		@Override
+	@Override
 	public PageResult findPage(TbSeller seller, int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);
-		
-		TbSellerExample example=new TbSellerExample();
-		Criteria criteria = example.createCriteria();
+		PageResult<TbSeller> result = new PageResult<TbSeller>();
+        //设置分页条件
+        PageHelper.startPage(pageNum, pageSize);
+
+        //构建查询条件
+        Example example = new Example(TbSeller.class);
+        Example.Criteria criteria = example.createCriteria();
 		
 		if(seller!=null){			
-						if(seller.getSellerId()!=null && seller.getSellerId().length()>0){
-				criteria.andSellerIdLike("%"+seller.getSellerId()+"%");
+						//如果字段不为空
+			if (seller.getSellerId()!=null && seller.getSellerId().length()>0) {
+				criteria.andLike("sellerId", "%" + seller.getSellerId() + "%");
 			}
-			if(seller.getName()!=null && seller.getName().length()>0){
-				criteria.andNameLike("%"+seller.getName()+"%");
+			//如果字段不为空
+			if (seller.getName()!=null && seller.getName().length()>0) {
+				criteria.andLike("name", "%" + seller.getName() + "%");
 			}
-			if(seller.getNickName()!=null && seller.getNickName().length()>0){
-				criteria.andNickNameLike("%"+seller.getNickName()+"%");
+			//如果字段不为空
+			if (seller.getNickName()!=null && seller.getNickName().length()>0) {
+				criteria.andLike("nickName", "%" + seller.getNickName() + "%");
 			}
-			if(seller.getPassword()!=null && seller.getPassword().length()>0){
-				criteria.andPasswordLike("%"+seller.getPassword()+"%");
+			//如果字段不为空
+			if (seller.getPassword()!=null && seller.getPassword().length()>0) {
+				criteria.andLike("password", "%" + seller.getPassword() + "%");
 			}
-			if(seller.getEmail()!=null && seller.getEmail().length()>0){
-				criteria.andEmailLike("%"+seller.getEmail()+"%");
+			//如果字段不为空
+			if (seller.getEmail()!=null && seller.getEmail().length()>0) {
+				criteria.andLike("email", "%" + seller.getEmail() + "%");
 			}
-			if(seller.getMobile()!=null && seller.getMobile().length()>0){
-				criteria.andMobileLike("%"+seller.getMobile()+"%");
+			//如果字段不为空
+			if (seller.getMobile()!=null && seller.getMobile().length()>0) {
+				criteria.andLike("mobile", "%" + seller.getMobile() + "%");
 			}
-			if(seller.getTelephone()!=null && seller.getTelephone().length()>0){
-				criteria.andTelephoneLike("%"+seller.getTelephone()+"%");
+			//如果字段不为空
+			if (seller.getTelephone()!=null && seller.getTelephone().length()>0) {
+				criteria.andLike("telephone", "%" + seller.getTelephone() + "%");
 			}
-			if(seller.getStatus()!=null && seller.getStatus().length()>0){
-				criteria.andStatusLike("%"+seller.getStatus()+"%");
+			//如果字段不为空
+			if (seller.getStatus()!=null && seller.getStatus().length()>0) {
+				criteria.andLike("status", "%" + seller.getStatus() + "%");
 			}
-			if(seller.getAddressDetail()!=null && seller.getAddressDetail().length()>0){
-				criteria.andAddressDetailLike("%"+seller.getAddressDetail()+"%");
+			//如果字段不为空
+			if (seller.getAddressDetail()!=null && seller.getAddressDetail().length()>0) {
+				criteria.andLike("addressDetail", "%" + seller.getAddressDetail() + "%");
 			}
-			if(seller.getLinkmanName()!=null && seller.getLinkmanName().length()>0){
-				criteria.andLinkmanNameLike("%"+seller.getLinkmanName()+"%");
+			//如果字段不为空
+			if (seller.getLinkmanName()!=null && seller.getLinkmanName().length()>0) {
+				criteria.andLike("linkmanName", "%" + seller.getLinkmanName() + "%");
 			}
-			if(seller.getLinkmanQq()!=null && seller.getLinkmanQq().length()>0){
-				criteria.andLinkmanQqLike("%"+seller.getLinkmanQq()+"%");
+			//如果字段不为空
+			if (seller.getLinkmanQq()!=null && seller.getLinkmanQq().length()>0) {
+				criteria.andLike("linkmanQq", "%" + seller.getLinkmanQq() + "%");
 			}
-			if(seller.getLinkmanMobile()!=null && seller.getLinkmanMobile().length()>0){
-				criteria.andLinkmanMobileLike("%"+seller.getLinkmanMobile()+"%");
+			//如果字段不为空
+			if (seller.getLinkmanMobile()!=null && seller.getLinkmanMobile().length()>0) {
+				criteria.andLike("linkmanMobile", "%" + seller.getLinkmanMobile() + "%");
 			}
-			if(seller.getLinkmanEmail()!=null && seller.getLinkmanEmail().length()>0){
-				criteria.andLinkmanEmailLike("%"+seller.getLinkmanEmail()+"%");
+			//如果字段不为空
+			if (seller.getLinkmanEmail()!=null && seller.getLinkmanEmail().length()>0) {
+				criteria.andLike("linkmanEmail", "%" + seller.getLinkmanEmail() + "%");
 			}
-			if(seller.getLicenseNumber()!=null && seller.getLicenseNumber().length()>0){
-				criteria.andLicenseNumberLike("%"+seller.getLicenseNumber()+"%");
+			//如果字段不为空
+			if (seller.getLicenseNumber()!=null && seller.getLicenseNumber().length()>0) {
+				criteria.andLike("licenseNumber", "%" + seller.getLicenseNumber() + "%");
 			}
-			if(seller.getTaxNumber()!=null && seller.getTaxNumber().length()>0){
-				criteria.andTaxNumberLike("%"+seller.getTaxNumber()+"%");
+			//如果字段不为空
+			if (seller.getTaxNumber()!=null && seller.getTaxNumber().length()>0) {
+				criteria.andLike("taxNumber", "%" + seller.getTaxNumber() + "%");
 			}
-			if(seller.getOrgNumber()!=null && seller.getOrgNumber().length()>0){
-				criteria.andOrgNumberLike("%"+seller.getOrgNumber()+"%");
+			//如果字段不为空
+			if (seller.getOrgNumber()!=null && seller.getOrgNumber().length()>0) {
+				criteria.andLike("orgNumber", "%" + seller.getOrgNumber() + "%");
 			}
-			if(seller.getLogoPic()!=null && seller.getLogoPic().length()>0){
-				criteria.andLogoPicLike("%"+seller.getLogoPic()+"%");
+			//如果字段不为空
+			if (seller.getLogoPic()!=null && seller.getLogoPic().length()>0) {
+				criteria.andLike("logoPic", "%" + seller.getLogoPic() + "%");
 			}
-			if(seller.getBrief()!=null && seller.getBrief().length()>0){
-				criteria.andBriefLike("%"+seller.getBrief()+"%");
+			//如果字段不为空
+			if (seller.getBrief()!=null && seller.getBrief().length()>0) {
+				criteria.andLike("brief", "%" + seller.getBrief() + "%");
 			}
-			if(seller.getLegalPerson()!=null && seller.getLegalPerson().length()>0){
-				criteria.andLegalPersonLike("%"+seller.getLegalPerson()+"%");
+			//如果字段不为空
+			if (seller.getLegalPerson()!=null && seller.getLegalPerson().length()>0) {
+				criteria.andLike("legalPerson", "%" + seller.getLegalPerson() + "%");
 			}
-			if(seller.getLegalPersonCardId()!=null && seller.getLegalPersonCardId().length()>0){
-				criteria.andLegalPersonCardIdLike("%"+seller.getLegalPersonCardId()+"%");
+			//如果字段不为空
+			if (seller.getLegalPersonCardId()!=null && seller.getLegalPersonCardId().length()>0) {
+				criteria.andLike("legalPersonCardId", "%" + seller.getLegalPersonCardId() + "%");
 			}
-			if(seller.getBankUser()!=null && seller.getBankUser().length()>0){
-				criteria.andBankUserLike("%"+seller.getBankUser()+"%");
+			//如果字段不为空
+			if (seller.getBankUser()!=null && seller.getBankUser().length()>0) {
+				criteria.andLike("bankUser", "%" + seller.getBankUser() + "%");
 			}
-			if(seller.getBankName()!=null && seller.getBankName().length()>0){
-				criteria.andBankNameLike("%"+seller.getBankName()+"%");
+			//如果字段不为空
+			if (seller.getBankName()!=null && seller.getBankName().length()>0) {
+				criteria.andLike("bankName", "%" + seller.getBankName() + "%");
 			}
 	
 		}
+
+        //查询数据
+        List<TbSeller> list = sellerMapper.selectByExample(example);
+        //保存数据列表
+        result.setRows(list);
+
+        //获取总记录数
+        PageInfo<TbSeller> info = new PageInfo<TbSeller>(list);
+        result.setTotal(info.getTotal());
 		
-		Page<TbSeller> page= (Page<TbSeller>)sellerMapper.selectByExample(example);		
-		return new PageResult(page.getTotal(), page.getResult());
+		return result;
 	}
 	
 }

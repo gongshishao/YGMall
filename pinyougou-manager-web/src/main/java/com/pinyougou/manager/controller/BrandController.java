@@ -34,7 +34,7 @@ public class BrandController {
      * @return
      */
     @RequestMapping("/findByPage")
-    public PageResult findByPage(int pageNum,int pageSize) {
+    public PageResult<TbBrand> findByPage(int pageNum,int pageSize) {
         return brandService.findByPage(pageNum, pageSize);
     }
 

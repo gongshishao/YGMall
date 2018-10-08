@@ -6,15 +6,14 @@ import java.util.List;
 /**
  * 分页查询类,可作为公共类
  */
-public class PageResult implements Serializable {
-
+public class PageResult<T> implements Serializable {
     private long total;//总记录数
-    private List rows;//当前页结果集
+    private List<T> rows;//当前页结果
 
     public PageResult() {
     }
 
-    public PageResult(long total, List rows) {
+    public PageResult(long total, List<T> rows) {
         super();
         this.total = total;
         this.rows = rows;
@@ -28,11 +27,11 @@ public class PageResult implements Serializable {
         this.total = total;
     }
 
-    public List getRows() {
+    public List<T> getRows() {
         return rows;
     }
 
-    public void setRows(List rows) {
+    public void setRows(List<T> rows) {
         this.rows = rows;
     }
 }

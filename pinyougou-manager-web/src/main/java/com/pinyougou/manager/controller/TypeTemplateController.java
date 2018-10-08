@@ -11,8 +11,8 @@ import com.pinyougou.sellergoods.service.TypeTemplateService;
 import entity.PageResult;
 import entity.Result;
 /**
- * controller
- * @author Administrator
+ * 请求处理器
+ * @author Steven
  *
  */
 @RestController
@@ -99,9 +99,9 @@ public class TypeTemplateController {
 		}
 	}
 	
-		/**
+	/**
 	 * 查询+分页
-	 * @param brand
+	 * @param typeTemplate
 	 * @param page
 	 * @param rows
 	 * @return

@@ -11,8 +11,8 @@ import com.pinyougou.sellergoods.service.SellerService;
 import entity.PageResult;
 import entity.Result;
 /**
- * controller
- * @author Administrator
+ * 请求处理器
+ * @author Steven
  *
  */
 @RestController
@@ -79,7 +79,7 @@ public class SellerController {
 	 * @return
 	 */
 	@RequestMapping("/findOne")
-	public TbSeller findOne(String id){
+	public TbSeller findOne(Long id){
 		return sellerService.findOne(id);		
 	}
 	
@@ -89,7 +89,7 @@ public class SellerController {
 	 * @return
 	 */
 	@RequestMapping("/delete")
-	public Result delete(String [] ids){
+	public Result delete(Long [] ids){
 		try {
 			sellerService.delete(ids);
 			return new Result(true, "删除成功"); 
@@ -99,9 +99,9 @@ public class SellerController {
 		}
 	}
 	
-		/**
+	/**
 	 * 查询+分页
-	 * @param brand
+	 * @param seller
 	 * @param page
 	 * @param rows
 	 * @return

@@ -4,8 +4,8 @@ import com.pinyougou.pojo.TbItem;
 
 import entity.PageResult;
 /**
- * 服务层接口
- * @author Administrator
+ * 业务逻辑接口
+ * @author Steven
  *
  */
 public interface ItemService {

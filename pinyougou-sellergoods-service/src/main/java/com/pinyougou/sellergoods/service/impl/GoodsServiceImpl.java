@@ -1,20 +1,20 @@
 package com.pinyougou.sellergoods.service.impl;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.github.abel533.entity.Example;
+import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.pinyougou.mapper.TbGoodsMapper;
 import com.pinyougou.pojo.TbGoods;
-import com.pinyougou.pojo.TbGoodsExample;
-import com.pinyougou.pojo.TbGoodsExample.Criteria;
 import com.pinyougou.sellergoods.service.GoodsService;
-
 import entity.PageResult;
 
 /**
- * 服务实现层
- * @author Administrator
+ * 业务逻辑实现
+ * @author Steven
  *
  */
 @Service
@@ -28,7 +28,7 @@ public class GoodsServiceImpl implements GoodsService {
 	 */
 	@Override
 	public List<TbGoods> findAll() {
-		return goodsMapper.selectByExample(null);
+		return goodsMapper.select(null);
 	}
 
 	/**
@@ -36,9 +36,20 @@ public class GoodsServiceImpl implements GoodsService {
 	 */
 	@Override
 	public PageResult findPage(int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);		
-		Page<TbGoods> page=   (Page<TbGoods>) goodsMapper.selectByExample(null);
-		return new PageResult(page.getTotal(), page.getResult());
+		
+		PageResult<TbGoods> result = new PageResult<TbGoods>();
+        //设置分页条件
+        PageHelper.startPage(pageNum, pageSize);
+
+        //查询数据
+        List<TbGoods> list = goodsMapper.select(null);
+        //保存数据列表
+        result.setRows(list);
+
+        //获取总记录数
+        PageInfo<TbGoods> info = new PageInfo<TbGoods>(list);
+        result.setTotal(info.getTotal());
+		return result;
 	}
 
 	/**
@@ -46,7 +57,7 @@ public class GoodsServiceImpl implements GoodsService {
 	 */
 	@Override
 	public void add(TbGoods goods) {
-		goodsMapper.insert(goods);		
+		goodsMapper.insertSelective(goods);		
 	}
 
 	
@@ -55,7 +66,7 @@ public class GoodsServiceImpl implements GoodsService {
 	 */
 	@Override
 	public void update(TbGoods goods){
-		goodsMapper.updateByPrimaryKey(goods);
+		goodsMapper.updateByPrimaryKeySelective(goods);
 	}	
 	
 	/**
@@ -73,49 +84,74 @@ public class GoodsServiceImpl implements GoodsService {
 	 */
 	@Override
 	public void delete(Long[] ids) {
-		for(Long id:ids){
-			goodsMapper.deleteByPrimaryKey(id);
-		}		
+		//数组转list
+        List longs = Arrays.asList(ids);
+        //构建查询条件
+        Example example = new Example(TbGoods.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andIn("id", longs);
+
+        //跟据查询条件删除数据
+        goodsMapper.deleteByExample(example);
 	}
 	
 	
-		@Override
+	@Override
 	public PageResult findPage(TbGoods goods, int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);
-		
-		TbGoodsExample example=new TbGoodsExample();
-		Criteria criteria = example.createCriteria();
+		PageResult<TbGoods> result = new PageResult<TbGoods>();
+        //设置分页条件
+        PageHelper.startPage(pageNum, pageSize);
+
+        //构建查询条件
+        Example example = new Example(TbGoods.class);
+        Example.Criteria criteria = example.createCriteria();
 		
 		if(goods!=null){			
-						if(goods.getSellerId()!=null && goods.getSellerId().length()>0){
-				criteria.andSellerIdLike("%"+goods.getSellerId()+"%");
+						//如果字段不为空
+			if (goods.getSellerId()!=null && goods.getSellerId().length()>0) {
+				criteria.andLike("sellerId", "%" + goods.getSellerId() + "%");
 			}
-			if(goods.getGoodsName()!=null && goods.getGoodsName().length()>0){
-				criteria.andGoodsNameLike("%"+goods.getGoodsName()+"%");
+			//如果字段不为空
+			if (goods.getGoodsName()!=null && goods.getGoodsName().length()>0) {
+				criteria.andLike("goodsName", "%" + goods.getGoodsName() + "%");
 			}
-			if(goods.getAuditStatus()!=null && goods.getAuditStatus().length()>0){
-				criteria.andAuditStatusLike("%"+goods.getAuditStatus()+"%");
+			//如果字段不为空
+			if (goods.getAuditStatus()!=null && goods.getAuditStatus().length()>0) {
+				criteria.andLike("auditStatus", "%" + goods.getAuditStatus() + "%");
 			}
-			if(goods.getIsMarketable()!=null && goods.getIsMarketable().length()>0){
-				criteria.andIsMarketableLike("%"+goods.getIsMarketable()+"%");
+			//如果字段不为空
+			if (goods.getIsMarketable()!=null && goods.getIsMarketable().length()>0) {
+				criteria.andLike("isMarketable", "%" + goods.getIsMarketable() + "%");
 			}
-			if(goods.getCaption()!=null && goods.getCaption().length()>0){
-				criteria.andCaptionLike("%"+goods.getCaption()+"%");
+			//如果字段不为空
+			if (goods.getCaption()!=null && goods.getCaption().length()>0) {
+				criteria.andLike("caption", "%" + goods.getCaption() + "%");
 			}
-			if(goods.getSmallPic()!=null && goods.getSmallPic().length()>0){
-				criteria.andSmallPicLike("%"+goods.getSmallPic()+"%");
+			//如果字段不为空
+			if (goods.getSmallPic()!=null && goods.getSmallPic().length()>0) {
+				criteria.andLike("smallPic", "%" + goods.getSmallPic() + "%");
 			}
-			if(goods.getIsEnableSpec()!=null && goods.getIsEnableSpec().length()>0){
-				criteria.andIsEnableSpecLike("%"+goods.getIsEnableSpec()+"%");
+			//如果字段不为空
+			if (goods.getIsEnableSpec()!=null && goods.getIsEnableSpec().length()>0) {
+				criteria.andLike("isEnableSpec", "%" + goods.getIsEnableSpec() + "%");
 			}
-			if(goods.getIsDelete()!=null && goods.getIsDelete().length()>0){
-				criteria.andIsDeleteLike("%"+goods.getIsDelete()+"%");
+			//如果字段不为空
+			if (goods.getIsDelete()!=null && goods.getIsDelete().length()>0) {
+				criteria.andLike("isDelete", "%" + goods.getIsDelete() + "%");
 			}
 	
 		}
+
+        //查询数据
+        List<TbGoods> list = goodsMapper.selectByExample(example);
+        //保存数据列表
+        result.setRows(list);
+
+        //获取总记录数
+        PageInfo<TbGoods> info = new PageInfo<TbGoods>(list);
+        result.setTotal(info.getTotal());
 		
-		Page<TbGoods> page= (Page<TbGoods>)goodsMapper.selectByExample(example);		
-		return new PageResult(page.getTotal(), page.getResult());
+		return result;
 	}
 	
 }

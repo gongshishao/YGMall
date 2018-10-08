@@ -1,20 +1,20 @@
 package com.pinyougou.sellergoods.service.impl;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.github.abel533.entity.Example;
+import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.pinyougou.mapper.TbSpecificationOptionMapper;
 import com.pinyougou.pojo.TbSpecificationOption;
-import com.pinyougou.pojo.TbSpecificationOptionExample;
-import com.pinyougou.pojo.TbSpecificationOptionExample.Criteria;
 import com.pinyougou.sellergoods.service.SpecificationOptionService;
-
 import entity.PageResult;
 
 /**
- * 服务实现层
- * @author Administrator
+ * 业务逻辑实现
+ * @author Steven
  *
  */
 @Service
@@ -28,7 +28,7 @@ public class SpecificationOptionServiceImpl implements SpecificationOptionServic
 	 */
 	@Override
 	public List<TbSpecificationOption> findAll() {
-		return specificationOptionMapper.selectByExample(null);
+		return specificationOptionMapper.select(null);
 	}
 
 	/**
@@ -36,9 +36,20 @@ public class SpecificationOptionServiceImpl implements SpecificationOptionServic
 	 */
 	@Override
 	public PageResult findPage(int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);		
-		Page<TbSpecificationOption> page=   (Page<TbSpecificationOption>) specificationOptionMapper.selectByExample(null);
-		return new PageResult(page.getTotal(), page.getResult());
+		
+		PageResult<TbSpecificationOption> result = new PageResult<TbSpecificationOption>();
+        //设置分页条件
+        PageHelper.startPage(pageNum, pageSize);
+
+        //查询数据
+        List<TbSpecificationOption> list = specificationOptionMapper.select(null);
+        //保存数据列表
+        result.setRows(list);
+
+        //获取总记录数
+        PageInfo<TbSpecificationOption> info = new PageInfo<TbSpecificationOption>(list);
+        result.setTotal(info.getTotal());
+		return result;
 	}
 
 	/**
@@ -46,7 +57,7 @@ public class SpecificationOptionServiceImpl implements SpecificationOptionServic
 	 */
 	@Override
 	public void add(TbSpecificationOption specificationOption) {
-		specificationOptionMapper.insert(specificationOption);		
+		specificationOptionMapper.insertSelective(specificationOption);		
 	}
 
 	
@@ -55,7 +66,7 @@ public class SpecificationOptionServiceImpl implements SpecificationOptionServic
 	 */
 	@Override
 	public void update(TbSpecificationOption specificationOption){
-		specificationOptionMapper.updateByPrimaryKey(specificationOption);
+		specificationOptionMapper.updateByPrimaryKeySelective(specificationOption);
 	}	
 	
 	/**
@@ -73,28 +84,46 @@ public class SpecificationOptionServiceImpl implements SpecificationOptionServic
 	 */
 	@Override
 	public void delete(Long[] ids) {
-		for(Long id:ids){
-			specificationOptionMapper.deleteByPrimaryKey(id);
-		}		
+		//数组转list
+        List longs = Arrays.asList(ids);
+        //构建查询条件
+        Example example = new Example(TbSpecificationOption.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andIn("id", longs);
+
+        //跟据查询条件删除数据
+        specificationOptionMapper.deleteByExample(example);
 	}
 	
 	
-		@Override
+	@Override
 	public PageResult findPage(TbSpecificationOption specificationOption, int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);
-		
-		TbSpecificationOptionExample example=new TbSpecificationOptionExample();
-		Criteria criteria = example.createCriteria();
+		PageResult<TbSpecificationOption> result = new PageResult<TbSpecificationOption>();
+        //设置分页条件
+        PageHelper.startPage(pageNum, pageSize);
+
+        //构建查询条件
+        Example example = new Example(TbSpecificationOption.class);
+        Example.Criteria criteria = example.createCriteria();
 		
 		if(specificationOption!=null){			
-						if(specificationOption.getOptionName()!=null && specificationOption.getOptionName().length()>0){
-				criteria.andOptionNameLike("%"+specificationOption.getOptionName()+"%");
+						//如果字段不为空
+			if (specificationOption.getOptionName()!=null && specificationOption.getOptionName().length()>0) {
+				criteria.andLike("optionName", "%" + specificationOption.getOptionName() + "%");
 			}
 	
 		}
+
+        //查询数据
+        List<TbSpecificationOption> list = specificationOptionMapper.selectByExample(example);
+        //保存数据列表
+        result.setRows(list);
+
+        //获取总记录数
+        PageInfo<TbSpecificationOption> info = new PageInfo<TbSpecificationOption>(list);
+        result.setTotal(info.getTotal());
 		
-		Page<TbSpecificationOption> page= (Page<TbSpecificationOption>)specificationOptionMapper.selectByExample(example);		
-		return new PageResult(page.getTotal(), page.getResult());
+		return result;
 	}
 	
 }
