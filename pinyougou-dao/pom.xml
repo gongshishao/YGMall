@@ -12,6 +12,11 @@
     <artifactId>pinyougou-dao</artifactId>
     <packaging>jar</packaging>
     <dependencies>
+        <!--通用mapper-->
+        <dependency>
+            <groupId>com.github.abel533</groupId>
+            <artifactId>mapper</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.github.pagehelper</groupId>
