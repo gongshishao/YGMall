@@ -75,12 +75,12 @@ public class SpecificationController {
 	}	
 	
 	/**
-	 * 获取实体
+	 * 根据id获取实体,获得的是规格和规格列表的的包装实体类
 	 * @param id
 	 * @return
 	 */
 	@RequestMapping("/findOne")
-	public TbSpecification findOne(Long id){
+	public Specification findOne(Long id){
 		return specificationService.findOne(id);		
 	}
 	
@@ -102,7 +102,7 @@ public class SpecificationController {
 	
 		/**
 	 * 查询+分页
-	 * @param brand
+	 * @param specification
 	 * @param page
 	 * @param rows
 	 * @return

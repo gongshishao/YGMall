@@ -74,7 +74,7 @@
                                           <td>{{entity.id}}</td>
                                           <td>{{entity.specName}}</td>
                                           <td class="text-center">
-                                              <button ng-click="findOne(entity.id)" type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal" >删除</button>
+                                              <button ng-click="findOne(entity.id)" type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal" >修改</button>
                                           </td>
                                       </tr>
 			                      </tbody>
@@ -122,8 +122,7 @@
                     <tbody>
                     <!--循环遍历生成列表行,绑定编辑框-->
                       <tr ng-repeat="pojo in entity.specificationOptionList">
-                          <td><input  type="checkbox"></td>
-                          <td>
+                            <td>
 				            	<input ng-model="pojo.optionName" class="form-control" placeholder="规格选项">
 				            </td>
 				            <td>
