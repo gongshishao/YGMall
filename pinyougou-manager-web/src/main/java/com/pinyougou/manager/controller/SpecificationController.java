@@ -1,6 +1,7 @@
 package com.pinyougou.manager.controller;
 import java.util.List;
 
+import com.pinyougou.pojogroup.Specification;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,12 +43,12 @@ public class SpecificationController {
 	}
 	
 	/**
-	 * 增加
+	 * 增加,使用规格和规格选项的包装类
 	 * @param specification
 	 * @return
 	 */
 	@RequestMapping("/add")
-	public Result add(@RequestBody TbSpecification specification){
+	public Result add(@RequestBody Specification specification){
 		try {
 			specificationService.add(specification);
 			return new Result(true, "增加成功");

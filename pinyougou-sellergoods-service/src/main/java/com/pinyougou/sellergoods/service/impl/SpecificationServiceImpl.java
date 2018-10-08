@@ -1,5 +1,9 @@
 package com.pinyougou.sellergoods.service.impl;
 import java.util.List;
+
+import com.pinyougou.mapper.TbSpecificationOptionMapper;
+import com.pinyougou.pojo.TbSpecificationOption;
+import com.pinyougou.pojogroup.Specification;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
@@ -11,6 +15,7 @@ import com.pinyougou.pojo.TbSpecificationExample.Criteria;
 import com.pinyougou.sellergoods.service.SpecificationService;
 
 import entity.PageResult;
+import org.springframework.messaging.simp.config.TaskExecutorRegistration;
 
 /**
  * 服务实现层
@@ -22,7 +27,10 @@ public class SpecificationServiceImpl implements SpecificationService {
 
 	@Autowired
 	private TbSpecificationMapper specificationMapper;
-	
+
+	@Autowired
+	private TbSpecificationOptionMapper specificationOptionMapper;
+
 	/**
 	 * 查询全部
 	 */
@@ -42,11 +50,18 @@ public class SpecificationServiceImpl implements SpecificationService {
 	}
 
 	/**
-	 * 增加
+	 * 增加,使用规格和规格选项的包装类
 	 */
 	@Override
-	public void add(TbSpecification specification) {
-		specificationMapper.insert(specification);		
+	public void add(Specification specification) {
+		//插入规格
+		specificationMapper.insert(specification.getSpecification());
+		//循环插入规格选项
+		for (TbSpecificationOption specificationOption : specification.getSpecificationOptionList()) {
+			specificationOption.setId(specification.getSpecification().getId());
+			specificationOptionMapper.insert(specificationOption);
+		}
+
 	}
 
 	

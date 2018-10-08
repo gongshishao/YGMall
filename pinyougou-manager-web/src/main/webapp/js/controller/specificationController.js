@@ -77,10 +77,14 @@ app.controller('specificationController' ,function($scope,$controller   ,specifi
 		);
 	}
 
-    //新增选项行
+    //新增选项行按钮的点击事件
     $scope.addTableRow=function(){
         $scope.entity.specificationOptionList.push({});
     }
 
+    //删除选项行
+    $scope.deleTableRow=function (index) {
+        $scope.entity.specificationOptionList.splice(index, 1);//根据索引值从集合中删除选项行
+    }
 
 });	
