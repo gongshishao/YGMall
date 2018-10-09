@@ -79,7 +79,7 @@ public class SellerController {
 	 * @return
 	 */
 	@RequestMapping("/findOne")
-	public TbSeller findOne(Long id){
+	public TbSeller findOne(String id){
 		return sellerService.findOne(id);		
 	}
 	

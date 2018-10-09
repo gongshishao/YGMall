@@ -12,7 +12,7 @@ app.service('brandService',function($http){
 
     //根据id查询品牌信息
     this.findOne=function (id) {
-        return $http.post("../brand/findOne.do?id="+id);
+        return $http.get("../brand/findOne.do?id="+id);
     }
 
     //增加

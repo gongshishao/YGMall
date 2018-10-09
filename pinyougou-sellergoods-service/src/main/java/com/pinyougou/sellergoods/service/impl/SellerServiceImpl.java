@@ -1,5 +1,6 @@
 package com.pinyougou.sellergoods.service.impl;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
@@ -53,10 +54,12 @@ public class SellerServiceImpl implements SellerService {
 	}
 
 	/**
-	 * 增加
+	 * 增加商家,默认设置为待审核状态0
 	 */
 	@Override
 	public void add(TbSeller seller) {
+		seller.setStatus("0");
+		seller.setCreateTime(new Date());
 		sellerMapper.insertSelective(seller);		
 	}
 
@@ -75,7 +78,7 @@ public class SellerServiceImpl implements SellerService {
 	 * @return
 	 */
 	@Override
-	public TbSeller findOne(Long id){
+	public TbSeller findOne(String id){
 		return sellerMapper.selectByPrimaryKey(id);
 	}
 
