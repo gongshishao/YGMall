@@ -133,6 +133,14 @@ public class SpecificationServiceImpl implements SpecificationService {
 
         //跟据查询条件删除数据
         specificationMapper.deleteByExample(example);
+
+        //注意删除关联的规格选项
+		for (Long id : ids) {
+			TbSpecificationOption option = new TbSpecificationOption();
+			option.setSpecId(id);
+			specificationOptionMapper.delete(option);
+		}
+
 	}
 	
 	

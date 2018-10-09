@@ -56,6 +56,13 @@ public class TbSpecification implements Serializable {
         this.specName = specName;
     }
 
+    /**
+     * 添加get方法用于支持前端select2获取内容
+     */
+    public String getText(){
+        return this.specName;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
