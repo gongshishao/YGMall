@@ -34,7 +34,7 @@ app.controller('sellerController' ,function($scope,$controller   ,sellerService)
 	//保存 
 	$scope.save=function(){				
 		var serviceObject;//服务层对象  				
-		if($scope.entity.id!=null){//如果有ID
+		if($scope.entity.sellerId!=null){//如果有ID
 			serviceObject=sellerService.update( $scope.entity ); //修改  
 		}else{
 			serviceObject=sellerService.add( $scope.entity  );//增加 
@@ -42,7 +42,8 @@ app.controller('sellerController' ,function($scope,$controller   ,sellerService)
 		serviceObject.success(
 			function(response){
 				if(response.success){
-					//重新查询 
+					//重新查询
+                    alert(response.message);
 		        	$scope.reloadList();//重新加载
 				}else{
 					alert(response.message);
@@ -76,5 +77,11 @@ app.controller('sellerController' ,function($scope,$controller   ,sellerService)
 			}			
 		);
 	}
+
+	//审核商家:更新status
+	$scope.updateStatus=function (sellerId,status) {
+		$scope.entity={"sellerId":sellerId,"status":status};
+        this.save();
+    }
     
 });	
