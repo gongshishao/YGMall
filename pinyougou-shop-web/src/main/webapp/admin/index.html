@@ -19,6 +19,12 @@
     <script src="../plugins/bootstrap/js/bootstrap.min.js"></script>
   
     <script src="../plugins/adminLTE/js/app.min.js"></script>
+    <!--引入angularJS-->
+    <script src="../plugins/angularjs/angular.min.js"></script>
+    <!--引入js分层代码-->
+    <script src="../js/base.js"></script>
+    <script src="../js/service/loginService.js"></script>
+    <script src="../js/controller/indexController.js"></script>
     
 
     
@@ -35,7 +41,7 @@
 
 </head>
 
-<body class="hold-transition skin-blue sidebar-mini">
+<body class="hold-transition skin-blue sidebar-mini" ng-init="showLoginName()" ng-app="pinyougou" ng-controller="indexController">
 
     <div class="wrapper">
 
@@ -277,7 +283,7 @@
                                         <a href="#" class="btn btn-default btn-flat">修改密码</a>
                                     </div>
                                     <div class="pull-right">
-                                        <a href="#" class="btn btn-default btn-flat">注销</a>
+                                        <a href="../logout" class="btn btn-default btn-flat">注销</a>
                                     </div>
                                 </li>
                             </ul>
