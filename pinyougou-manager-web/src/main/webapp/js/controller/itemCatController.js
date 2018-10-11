@@ -1,5 +1,5 @@
- //控制层 
-app.controller('itemCatController' ,function($scope,$controller   ,itemCatService){	
+ //控制层 ,额外引入typeTemplateService模板类型,提供给select2下拉框组件使用
+app.controller('itemCatController' ,function($scope,$controller   ,itemCatService,typeTemplateService){
 	
 	$controller('baseController',{$scope:$scope});//继承
 	
@@ -37,14 +37,18 @@ app.controller('itemCatController' ,function($scope,$controller   ,itemCatServic
 		if($scope.entity.id!=null){//如果有ID
 			serviceObject=itemCatService.update( $scope.entity ); //修改  
 		}else{
+            $scope.entity.parentId=$scope.parentId;//记住上级ID
 			serviceObject=itemCatService.add( $scope.entity  );//增加 
 		}				
 		serviceObject.success(
 			function(response){
 				if(response.success){
+                    alert(response.message);
 					//重新查询 
-		        	$scope.reloadList();//重新加载
-				}else{
+		        	//$scope.reloadList();//重新加载
+                    $scope.findByParentId($scope.parentId);//重新加载
+
+                }else{
 					alert(response.message);
 				}
 			}		
@@ -76,8 +80,12 @@ app.controller('itemCatController' ,function($scope,$controller   ,itemCatServic
 			}			
 		);
 	}
+
+	//初始化变量
+	$scope.parentId=0;
     //根据父类id搜索类目列表
 	$scope.findByParentId=function (parentId) {
+		$scope.parentId=parentId;//记住上级ID
 		itemCatService.findByParentId(parentId).success(
 			function (response) {
                 $scope.list = response;
@@ -107,5 +115,22 @@ app.controller('itemCatController' ,function($scope,$controller   ,itemCatServic
         //最后调用一下查询当前目录列表
         this.findByParentId(v_entity.id);
     }
-    
+
+    //类型模板列表
+    $scope.typeTemplateList={data:[]};
+    $scope.findTypeTemplate=function () {
+        typeTemplateService.findAll().success(
+            function (response) {
+                //删除多余的属性
+                for (var k = 0; k < response.length; k++) {
+                    delete response[k]["brandIds"];
+                    delete response[k]["customAttributeItems"];
+                    delete response[k]["specIds"];
+                    delete response[k]["name"];
+                }
+                $scope.typeTemplateList={data:response};
+            }
+        );
+    }
+
 });	

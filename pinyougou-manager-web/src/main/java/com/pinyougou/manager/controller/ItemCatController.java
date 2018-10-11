@@ -1,6 +1,7 @@
 package com.pinyougou.manager.controller;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +20,8 @@ import entity.Result;
 @RequestMapping("/itemCat")
 public class ItemCatController {
 
+	//引入日志进行控制台输出
+	private Logger logger = Logger.getLogger(ItemCatService.class);
 	@Reference
 	private ItemCatService itemCatService;
 	
@@ -52,7 +55,7 @@ public class ItemCatController {
 			itemCatService.add(itemCat);
 			return new Result(true, "增加成功");
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("新增商品类目时发生错误,原因是:"+e);
 			return new Result(false, "增加失败");
 		}
 	}
@@ -68,7 +71,7 @@ public class ItemCatController {
 			itemCatService.update(itemCat);
 			return new Result(true, "修改成功");
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("修改商品类目时发生错误,原因是:"+e);
 			return new Result(false, "修改失败");
 		}
 	}	
@@ -94,8 +97,10 @@ public class ItemCatController {
 			itemCatService.delete(ids);
 			return new Result(true, "删除成功"); 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("删除商品类目时发生错误,原因是:"+e);
 			return new Result(false, "删除失败");
+		}finally {
+			logger.error("删除商品类目方法执行了");
 		}
 	}
 	

@@ -1,4 +1,4 @@
- //控制层 
+ //控制层 ,额外引入brandService品牌和specificationService规格类型,提供给select2下拉框组件使用
 app.controller('typeTemplateController' ,function($scope,$controller   ,typeTemplateService,brandService,specificationService){
 	
 	$controller('baseController',{$scope:$scope});//继承

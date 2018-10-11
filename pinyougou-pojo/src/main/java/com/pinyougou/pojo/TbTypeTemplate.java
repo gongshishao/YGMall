@@ -57,6 +57,12 @@ public class TbTypeTemplate implements Serializable {
         return name;
     }
 
+    public String getText(){
+        return this.name;
+    }
+
+
+
     /**
      * 设置模板名称
      *
