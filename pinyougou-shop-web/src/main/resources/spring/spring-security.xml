@@ -12,12 +12,8 @@
     <http pattern="/img/**" security="none"></http>
     <http pattern="/js/**" security="none"></http>
     <http pattern="/plugins/**" security="none"></http>
-    <!--不拦截商家注册url-->
+    <!--不拦截商家注册url请求-->
     <http pattern="/seller/add.do" security="none"></http>
-
-
-
-
 
     <!-- 页面拦截规则 -->
     <!--use-expressions 为是否使用使用 Spring 表达式语言（ SpEL ），
