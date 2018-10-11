@@ -39,7 +39,7 @@
             注意：以下三个地址必须带"/"不然会报错
             login-processing-url可以用来修改默认的登录页面login.html
         -->
-        <form-login  login-processing-url="/shoplogin" default-target-url="/admin/index.html"
+        <form-login  login-page="/shoplogin.html" default-target-url="/admin/index.html"
                     authentication-failure-url="/shoplogin.html" always-use-default-target="true"/>
         <!--
             加此配置后，会自动的产生退出登录的地址/logout,如果你不想用这个地址 ，
@@ -67,6 +67,8 @@
     </authentication-manager>
     <!--配置权限认证类-->
     <beans:bean id="userDetailsService" class="com.pinyougou.shop.service.UserDetailsServiceImpl"/>
+
+
     <!--配置加密算法-->
     <beans:bean id="bcryptEncoder"
                 class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
@@ -75,5 +77,6 @@
     <dubbo:application name="pinyougou-shop-web" />
     <dubbo:registry address="zookeeper://192.168.25.129:2181"/>
     <dubbo:annotation package="com.pinyougou.shop.service" />
+
 
 </beans:beans>
