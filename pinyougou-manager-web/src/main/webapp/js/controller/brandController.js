@@ -71,7 +71,7 @@ app.controller('brandController' ,function($scope,$controller,brandService){
     $scope.searchEntity={};
     $scope.search=function (pageNum, pageSize) {
         brandService.search(pageNum, pageSize,$scope.searchEntity).success(
-            function (response) {
+                function (response) {
                 $scope.list = response.rows;//获得当前页数据,对应PageResult中的rows
                 $scope.paginationConf.totalItems = response.total;//更新总记录数,对应PageResult中的total
             }

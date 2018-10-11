@@ -76,5 +76,36 @@ app.controller('itemCatController' ,function($scope,$controller   ,itemCatServic
 			}			
 		);
 	}
+    //根据父类id搜索类目列表
+	$scope.findByParentId=function (parentId) {
+		itemCatService.findByParentId(parentId).success(
+			function (response) {
+                $scope.list = response;
+            }
+		);
+    }
+
+    //面包屑导航,默认页面加载时在第一级目录
+	$scope.grade=1;
+	//设置类目分级
+	$scope.setGrade=function (value) {
+		$scope.grade=value;
+    }
+
+    //给面包屑添加记录
+    $scope.selectList=function (v_entity) {
+        if ($scope.grade == 1) {
+            $scope.entity_1 = null;
+            $scope.entity_2 = null;
+        }else if ($scope.grade == 2) {
+            $scope.entity_1 = v_entity;
+            $scope.entity_2 = null;
+        } else {
+            $scope.entity_2 = v_entity;
+        }
+
+        //最后调用一下查询当前目录列表
+        this.findByParentId(v_entity.id);
+    }
     
 });	

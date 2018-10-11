@@ -125,5 +125,16 @@ public class ItemCatServiceImpl implements ItemCatService {
 		
 		return result;
 	}
-	
+
+	/**
+	 * 根据parentId查询商品类目列表
+	 * @param parentId
+	 * @return
+	 */
+	@Override
+	public List<TbItemCat> findByParentId(Long parentId) {
+		TbItemCat itemCat = new TbItemCat();
+		itemCat.setParentId(parentId);
+		return itemCatMapper.select(itemCat);
+	}
 }
