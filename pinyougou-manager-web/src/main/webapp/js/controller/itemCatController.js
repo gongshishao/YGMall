@@ -127,6 +127,7 @@ app.controller('itemCatController' ,function($scope,$controller   ,itemCatServic
                     delete response[k]["brandIds"];
                     delete response[k]["customAttributeItems"];
                     delete response[k]["specIds"];
+                    delete response[k]["name"];
                 }
                 $scope.typeTemplateList={data:response};
             }
