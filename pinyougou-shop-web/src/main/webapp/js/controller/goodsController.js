@@ -1,5 +1,5 @@
  //控制层 
-app.controller('goodsController' ,function($scope,$controller   ,goodsService){	
+app.controller('goodsController' ,function($scope,$controller   ,goodsService,uploadService){
 	
 	$controller('baseController',{$scope:$scope});//继承
 	
@@ -30,9 +30,10 @@ app.controller('goodsController' ,function($scope,$controller   ,goodsService){
 			}
 		);				
 	}
-	
+
 	//保存 
-	$scope.save=function(){				
+	$scope.save=function(){
+        $scope.entity.goodsDesc.introduction=editor.html();
 		var serviceObject;//服务层对象  				
 		if($scope.entity.id!=null){//如果有ID
 			serviceObject=goodsService.update( $scope.entity ); //修改  
@@ -42,8 +43,12 @@ app.controller('goodsController' ,function($scope,$controller   ,goodsService){
 		serviceObject.success(
 			function(response){
 				if(response.success){
-					//重新查询 
-		        	$scope.reloadList();//重新加载
+                    alert(response.message);
+					//重新查询
+                    //清空实体
+                    $scope.entity={};
+                    editor.html('');//清空富文本编辑器
+                    $scope.reloadList();//重新加载
 				}else{
 					alert(response.message);
 				}
@@ -76,5 +81,21 @@ app.controller('goodsController' ,function($scope,$controller   ,goodsService){
 			}			
 		);
 	}
-    
-});	
+
+	//文件上传
+	$scope.upload=function () {
+        uploadService.uploadFile().success(
+            function (response) {
+                //上传成功则绑定到表单
+                if (response.success) {
+                    alert(response.message);
+                    $scope.img_entity.url = response.message;
+                } else {
+                    alert(response.message);
+                }
+            }).error(function () {
+            alert("上传发生错误");
+        });
+    }
+
+});

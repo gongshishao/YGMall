@@ -2,9 +2,12 @@ package com.pinyougou.shop.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.pinyougou.pojo.TbGoods;
+import com.pinyougou.pojogroup.Goods;
 import com.pinyougou.sellergoods.service.GoodsService;
 import entity.PageResult;
 import entity.Result;
+import org.apache.log4j.Logger;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +23,7 @@ import java.util.List;
 @RequestMapping("/goods")
 public class GoodsController {
 
+	private Logger logger = Logger.getLogger(GoodsService.class);
 	@Reference
 	private GoodsService goodsService;
 	
@@ -43,17 +47,19 @@ public class GoodsController {
 	}
 	
 	/**
-	 * 增加
+	 * 新增商品,注意要设置商品的selleId,从认证的登录用户获取
 	 * @param goods
 	 * @return
 	 */
 	@RequestMapping("/add")
-	public Result add(@RequestBody TbGoods goods){
+	public Result add(@RequestBody Goods goods){
 		try {
+			String name = SecurityContextHolder.getContext().getAuthentication().getName();
+			goods.getTbGoods().setSellerId(name);//商家用户名即商品里的sellerId
 			goodsService.add(goods);
 			return new Result(true, "增加成功");
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("新增发布商品失败,原因是:"+e);
 			return new Result(false, "增加失败");
 		}
 	}
