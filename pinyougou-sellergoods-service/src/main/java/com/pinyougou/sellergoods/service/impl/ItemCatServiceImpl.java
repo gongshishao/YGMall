@@ -1,6 +1,9 @@
 package com.pinyougou.sellergoods.service.impl;
 import java.util.Arrays;
 import java.util.List;
+
+import com.pinyougou.mapper.TbTypeTemplateMapper;
+import com.pinyougou.pojo.TbTypeTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.abel533.entity.Example;
@@ -22,6 +25,9 @@ public class ItemCatServiceImpl implements ItemCatService {
 
 	@Autowired
 	private TbItemCatMapper itemCatMapper;
+
+	@Autowired
+	private TbTypeTemplateMapper typeTemplateMapper;
 	
 	/**
 	 * 查询全部
@@ -57,7 +63,7 @@ public class ItemCatServiceImpl implements ItemCatService {
 	 */
 	@Override
 	public void add(TbItemCat itemCat) {
-		itemCatMapper.insertSelective(itemCat);		
+		itemCatMapper.insertSelective(itemCat);
 	}
 
 	

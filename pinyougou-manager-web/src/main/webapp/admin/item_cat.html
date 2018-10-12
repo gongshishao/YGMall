@@ -59,7 +59,7 @@
                             <div class="pull-left">
                                 <div class="form-group form-inline">
                                     <div class="btn-group">
-                                        <button  type="button" class="btn btn-default" title="新建" data-toggle="modal" data-target="#editModal" ><i class="fa fa-file-o"></i> 新建</button>
+                                        <button ng-click="entity={}"  type="button" class="btn btn-default" title="新建" data-toggle="modal" data-target="#editModal" ><i class="fa fa-file-o"></i> 新建</button>
                                         <button ng-click="dele()" type="button" class="btn btn-default" title="删除" ><i class="fa fa-trash-o"></i> 删除</button>
                                         <button type="button" class="btn btn-default" onclick="location.reload()" title="刷新"  ><i class="fa fa-check"></i> 刷新</button>
                                        
@@ -134,12 +134,13 @@
 		      	<tr>
 		      		<td>类型模板</td>
 		      		<td>
+						{{entity.typeId}}
 						<!--multiple 表示可多选,此处不可多选,一个商品一般使用一个类型模板
                                                config 用于配置数据来源
                                                select2-model 用于指定用户选择后提交的变量
                                               <input select2 select-model="entity.typeId" config="options['type_template']" placeholder="商品类型模板" class="form-control" type="text"/>
                                            -->
-		      			<input select2 select2-model="entity.typeId"  config="typeTemplateList" multiple  placeholder="商品类型模板" class="form-control" type="text"/>
+		      			<input select2 ng-model="entity.typeId"  config="typeTemplateList"  placeholder="商品类型模板" class="form-control" type="text"/>
 		      		</td>		      		      		
 		      	</tr>		      	
 			 </table>				

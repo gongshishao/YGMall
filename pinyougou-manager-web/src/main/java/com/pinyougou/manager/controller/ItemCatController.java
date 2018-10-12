@@ -1,6 +1,8 @@
 package com.pinyougou.manager.controller;
 import java.util.List;
 
+import com.pinyougou.pojo.TbTypeTemplate;
+import com.pinyougou.sellergoods.service.TypeTemplateService;
 import org.apache.log4j.Logger;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +26,8 @@ public class ItemCatController {
 	private Logger logger = Logger.getLogger(ItemCatService.class);
 	@Reference
 	private ItemCatService itemCatService;
-	
+
+
 	/**
 	 * 返回全部列表
 	 * @return

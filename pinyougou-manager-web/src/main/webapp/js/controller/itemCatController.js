@@ -38,7 +38,7 @@ app.controller('itemCatController' ,function($scope,$controller   ,itemCatServic
 			serviceObject=itemCatService.update( $scope.entity ); //修改  
 		}else{
             $scope.entity.parentId=$scope.parentId;//记住上级ID
-			serviceObject=itemCatService.add( $scope.entity  );//增加 
+			serviceObject=itemCatService.add( $scope.entity );//增加
 		}				
 		serviceObject.success(
 			function(response){
@@ -62,7 +62,8 @@ app.controller('itemCatController' ,function($scope,$controller   ,itemCatServic
 		itemCatService.dele( $scope.selectIds ).success(
 			function(response){
 				if(response.success){
-					$scope.reloadList();//刷新列表
+                    alert(response.message);
+                    $scope.findByParentId($scope.parentId);//重新加载
 					$scope.selectIds=[];
 				}						
 			}		
@@ -126,7 +127,6 @@ app.controller('itemCatController' ,function($scope,$controller   ,itemCatServic
                     delete response[k]["brandIds"];
                     delete response[k]["customAttributeItems"];
                     delete response[k]["specIds"];
-                    delete response[k]["name"];
                 }
                 $scope.typeTemplateList={data:response};
             }
