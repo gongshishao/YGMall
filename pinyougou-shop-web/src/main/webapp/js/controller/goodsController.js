@@ -88,7 +88,6 @@ app.controller('goodsController' ,function($scope,$controller   ,goodsService,up
             function (response) {
                 //上传成功则绑定到表单
                 if (response.success) {
-                    alert(response.message);
                     $scope.img_entity.url = response.message;
                 } else {
                     alert(response.message);
@@ -96,6 +95,19 @@ app.controller('goodsController' ,function($scope,$controller   ,goodsService,up
             }).error(function () {
             alert("上传发生错误");
         });
+    }
+
+    //定义商品实体结构,注意itemImages图片项是包括颜色和图片路径的数组字段,并且可以有多个组合,对一个商品进行多项描述
+    $scope.entity = {goods: {}, goodsDesc: {itemImages: []}};
+    //保存图片,此处只是上传到页面图片列表,并未保存到数据库
+	$scope.add_image_entity=function () {
+        //添加图片列表
+        $scope.entity.goodsDesc.itemImages.push($scope.img_entity);
+    }
+    
+    //移除remove_image_entity
+	$scope.remove_image_entity=function (index) {
+        $scope.entity.goodsDesc.itemImages.splice(index, 1);
     }
 
 });
