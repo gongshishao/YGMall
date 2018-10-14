@@ -22,17 +22,14 @@
 	<script charset="utf-8" src="../plugins/kindeditor/lang/zh_CN.js"></script>
 	<script src="../plugins/angularjs/angular.min.js"></script>
 
+	<!--引入js分层代码-->
 	<script type="text/javascript" src="../js/base.js"></script>
 	<script type="text/javascript" src="../js/service/goodsService.js"></script>
 	<script type="text/javascript" src="../js/service/itemCatService.js"></script>
-	<script type="text/javascript" src="../js/service/uploadService.js">  </script>
+	<script type="text/javascript" src="../js/service/uploadService.js"></script>
+	<script type="text/javascript" src="../js/service/typeTemplateService.js"></script>
 	<script type="text/javascript" src="../js/controller/baseController.js"></script>
 	<script type="text/javascript" src="../js/controller/goodsController.js"></script>
-
-
-
-
-
 
 </head>
 
@@ -100,7 +97,7 @@
 		                           
 		                           <div class="col-md-2 title">品牌</div>
 		                           <div class="col-md-10 data">
-		                              <select class="form-control" ></select>
+		                              <select class="form-control" ng-model="entity.goods.brandId" ng-options="item.id as item.text for item in typeTemplate.brandIds" ></select>
 		                           </div>
 		
 								   <div class="col-md-2 title">副标题</div>
@@ -170,74 +167,32 @@
                             </div>
                            
                            
-                            <!--扩展属性-->
+                            <!--扩展属性customAttributeItems-->
                             <div class="tab-pane" id="customAttribute">
                                 <div class="row data-type">                                
-	                                <div>
-		                                <div class="col-md-2 title">扩展属性1</div>
+	                                <div ng-repeat="pojo in entity.goodsDesc.customAttributeItems">
+		                                <div class="col-md-2 title">{{pojo.text}}</div>
 				                        <div class="col-md-10 data">
-				                              <input class="form-control" placeholder="扩展属性1">	            	 
+				                              <input ng-model="pojo.value" class="form-control" placeholder="{{pojo.text}}">
 				                        </div>
 	                                </div>       
-									<div>
-		                                <div class="col-md-2 title">扩展属性2</div>
-				                        <div class="col-md-10 data">
-				                              <input class="form-control" placeholder="扩展属性2">	            	 
-				                        </div>
-	                                </div>  									
                                 </div>
                             </div>
-                      
-                            <!--规格-->
+
+                            <!--规格specificationItems-->
                             <div class="tab-pane" id="spec">
-                            	<div class="row data-type">
-	                            	<div class="col-md-2 title">是否启用规格</div>
-			                        <div class="col-md-10 data">
-			                        	<input type="checkbox" >			                           
+                            	<div class="row data-type" ng-repeat="pojo in specList">
+									{{entity.specList}}
+	                            	<div class="col-md-2 title">{{pojo.text}}</div>
+			                        <div class="col-md-10 data" >
+										<span ng-repeat="option in pojo.options">
+											<input type="checkbox" >{{option.optionName}}
+										</span>
+
 			                        </div>
                             	</div>
                             	<p>
                             	
-                            	<div>
-                            	
-	                                <div class="row data-type">
-	                                
-		                                <div>
-			                                <div class="col-md-2 title">屏幕尺寸</div>
-					                        <div class="col-md-10 data">
-					                               
-					                            <span>
-					                            	<input  type="checkbox" >4.0					                            				                            	
-					                            </span>  	
-												<span>
-					                            	<input  type="checkbox" >4.5					                            				                            	
-					                            </span>
-												<span>
-					                            	<input  type="checkbox" >5.0					                            				                            	
-					                            </span>												
-					                            	
-					                        </div>
-		                                </div>   
-										<div>
-			                                <div class="col-md-2 title">网络制式</div>
-					                        <div class="col-md-10 data">
-					                               
-					                            <span>
-					                            	<input  type="checkbox" >2G					                            				                            	
-					                            </span>  	
-												<span>
-					                            	<input  type="checkbox" >3G					                            				                            	
-					                            </span>
-												<span>
-					                            	<input  type="checkbox" >4G					                            				                            	
-					                            </span>												
-					                            	
-					                        </div>
-		                                </div>  
-		                                                                                  
-	                                </div>
-	
-	                                
 	                                <div class="row data-type">
 	                                	 <table class="table table-bordered table-striped table-hover dataTable">
 						                    <thead>

@@ -1,5 +1,5 @@
 //控制层
-app.controller('goodsController', function ($scope, $controller, itemCatService, goodsService, uploadService) {
+app.controller('goodsController', function ($scope, $controller, itemCatService, goodsService, typeTemplateService, uploadService) {
 
     $controller('baseController', {$scope: $scope});//继承
 
@@ -135,12 +135,59 @@ app.controller('goodsController', function ($scope, $controller, itemCatService,
 
     //选择三级类目后，更新模板id
     //$watch方法用于监控某个变量的值，当被监控的值发生变化，就自动执行相应的函数
-    $scope.$watch("entity.goods.category3Id",function (newValue,oldValue) {
+    $scope.$watch("entity.goods.category3Id", function (newValue, oldValue) {
         itemCatService.findOne(newValue).success(function (response) {
             $scope.entity.goods.typeTemplateId = response.typeId;
         })
     });
 
+    //根据模板id，更新品牌列表,规格列表
+    $scope.$watch("entity.goods.typeTemplateId", function (newValue, oldValue) {
+        typeTemplateService.findOne(newValue).success(function (response) {
+            $scope.typeTemplate = response;
+            $scope.typeTemplate.brandIds = JSON.parse(response.brandIds);
+
+            //在用户更新模板ID时，读取模板中的扩展属性赋给商品的扩展属性。
+            $scope.entity.goodsDesc.customAttributeItems = JSON.parse(response.customAttributeItems);
+            //获得规格列表
+            typeTemplateService.findSpecList(newValue).success(function (response) {
+                $scope.specList = response;
+            })
+        })
+    });
+
+    /**
+     * 勾选页面上的规格时调用此函数
+     * @param $event 当前点击的checkbox
+     * @param name 规格的名称
+     * @param value 规格选项的值
+     */
+    $scope.updateSpecAttribute = function ($event, name, value) {
+        //查找规格有没有保存过
+        var obj = this.searchObjectByKey($scope.entity.goodsDesc.specificationItems, 'attributeName', name);
+        //找到相关记录
+        if (obj != null) {
+            //如果已选中
+            if ($event.target.checked) {
+                obj.attributeValue.push(value);
+            } else { //取消勾选
+                //查找当前value的下标
+                var idx = $scope.selectIds.indexOf(value);
+                //删除数据
+                obj.attributeValue.splice(idx, 1);
+
+                //取消勾选后，如果当前列表里没有记录时，删除当前整个规格
+                if (obj.attributeValue.length == 0) {
+                    var valueIndex = $scope.entity.goodsDesc.specificationItems.indexOf(obj);
+                    $scope.entity.goodsDesc.specificationItems.splice(valueIndex, 1);
+                }
+            }
+        } else {
+            //添加一条记录
+            $scope.entity.goodsDesc.specificationItems.push(
+                {'attributeName': name, 'attributeValue': [value]});
+        }
+    }
 
 
 });

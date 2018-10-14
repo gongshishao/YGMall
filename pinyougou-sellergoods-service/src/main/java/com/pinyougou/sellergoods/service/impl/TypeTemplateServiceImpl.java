@@ -1,6 +1,11 @@
 package com.pinyougou.sellergoods.service.impl;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import com.alibaba.fastjson.JSON;
+import com.pinyougou.mapper.TbSpecificationOptionMapper;
+import com.pinyougou.pojo.TbSpecificationOption;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.abel533.entity.Example;
@@ -22,6 +27,9 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 
 	@Autowired
 	private TbTypeTemplateMapper typeTemplateMapper;
+
+	@Autowired
+	private TbSpecificationOptionMapper optionMapper;
 	
 	/**
 	 * 查询全部
@@ -137,5 +145,23 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 		
 		return result;
 	}
-	
+
+    @Override
+    public List<Map> findSpecList(Long id) {
+		TbTypeTemplate tbTypeTemplate = typeTemplateMapper.selectByPrimaryKey(id);//根据主键查询模板
+		String specIds = tbTypeTemplate.getSpecIds();//获得规格
+		//把json串转成List<Map>
+		List<Map> list = JSON.parseArray(specIds, Map.class);
+		TbSpecificationOption option = null;
+		//遍历规格列表，查询规格选项列表
+		for (Map map : list) {
+			//组装查询条件，跟据规格id查询规格选项列表
+			option = new TbSpecificationOption();
+			option.setSpecId(new Long(map.get("id").toString()));//根据specId查询规格选项列表
+			List<TbSpecificationOption> options = optionMapper.select(option);
+			map.put("options", options);
+		}
+		return list;
+    }
+
 }
