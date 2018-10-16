@@ -1,50 +1,60 @@
 package com.pinyougou.sellergoods.service.impl;
-import java.util.Arrays;
-import java.util.List;
 
-import com.pinyougou.mapper.TbGoodsDescMapper;
-import com.pinyougou.pojo.TbGoodsDesc;
-import com.pinyougou.pojogroup.Goods;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.github.abel533.entity.Example;
-import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.pinyougou.mapper.TbGoodsMapper;
-import com.pinyougou.pojo.TbGoods;
+import com.github.pagehelper.PageInfo;
+import com.pinyougou.mapper.*;
+import com.pinyougou.pojo.*;
+import com.pinyougou.pojogroup.Goods;
 import com.pinyougou.sellergoods.service.GoodsService;
 import entity.PageResult;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.*;
 
 /**
  * 业务逻辑实现
- * @author Steven
  *
+ * @author Steven
  */
 @Service
 public class GoodsServiceImpl implements GoodsService {
 
-	@Autowired
-	private TbGoodsMapper goodsMapper;
+    @Autowired
+    private TbGoodsMapper goodsMapper;
 
-	@Autowired
-	private TbGoodsDescMapper goodsDescMapper;
-	
-	/**
-	 * 查询全部
-	 */
-	@Override
-	public List<TbGoods> findAll() {
-		return goodsMapper.select(null);
-	}
+    @Autowired
+    private TbGoodsDescMapper goodsDescMapper;
 
-	/**
-	 * 按分页查询
-	 */
-	@Override
-	public PageResult findPage(int pageNum, int pageSize) {
-		
-		PageResult<TbGoods> result = new PageResult<TbGoods>();
+    @Autowired
+    private TbItemMapper itemMapper;
+
+    @Autowired
+    private TbBrandMapper brandMapper;
+
+    @Autowired
+    private TbItemCatMapper itemCatMapper;
+
+    @Autowired
+    private TbSellerMapper sellerMapper;
+
+    /**
+     * 查询全部
+     */
+    @Override
+    public List<TbGoods> findAll() {
+        return goodsMapper.select(null);
+    }
+
+    /**
+     * 按分页查询
+     */
+    @Override
+    public PageResult findPage(int pageNum, int pageSize) {
+
+        PageResult<TbGoods> result = new PageResult<TbGoods>();
         //设置分页条件
         PageHelper.startPage(pageNum, pageSize);
 
@@ -56,47 +66,101 @@ public class GoodsServiceImpl implements GoodsService {
         //获取总记录数
         PageInfo<TbGoods> info = new PageInfo<TbGoods>(list);
         result.setTotal(info.getTotal());
-		return result;
-	}
+        return result;
+    }
 
-	/**
-	 * 增加
-	 */
-	@Override
-	public void add(Goods goods) {
-		TbGoods tbGoods = goods.getTbGoods();
-		tbGoods.setAuditStatus("0");//设置发布商品状态
-		goodsMapper.insertSelective(tbGoods);
-		TbGoodsDesc goodsDesc = new TbGoodsDesc();
-		goodsDesc.setGoodsId(tbGoods.getId());//设置商品描述id
-		goodsDescMapper.insertSelective(goodsDesc);
-	}
+    /**
+     * 保存商品及sku,设计到的表有good,goodDesc,item
+     */
+    @Override
+    public void add(Goods goods) {
+        //1.保存商品主要信息
+        goods.getGoods().setAuditStatus("0");//设置发布商品状态为未审核
+        goodsMapper.insertSelective(goods.getGoods());
+        //2.保存商品描述
+        goods.getGoodsDesc().setGoodsId(goods.getGoods().getId());//设置商品描述id
+        goodsDescMapper.insertSelective(goods.getGoodsDesc());
+        //3.保存sku ==>item
+        //勾选了启用规格蔡需要保存sku
+        if ("1".equals(goods.getGoods().getIsEnableSpec())) {
+            for (TbItem item : goods.getItemList()) {
+                //1.设置item表中的商品标题,要求商品名+属性规格(是一个key:value形式的json数据)
+                String title = goods.getGoods().getGoodsName();
+                Map<String, Object> map = JSON.parseObject(item.getSpec());
+                Iterator<Map.Entry<String, Object>> iter = map.entrySet().iterator();//增强map遍历效率
+                while (iter.hasNext()) {
+                    //加上所有规格值 ==>attributeValue
+                    title += " " + iter.next().getValue();
+                }
+                item.setTitle(title);//设置商品标题
+                //3.设置item
+                setItemValues(goods, item);
+                //9.保存SKU
+                itemMapper.insertSelective(item);
+            }
+        }else {//未勾选则设置默认规格
+            TbItem item=new TbItem();
+            item.setTitle(goods.getGoods().getGoodsName());//商品KPU+规格描述串作为SKU名称
+            item.setPrice( goods.getGoods().getPrice() );//价格
+            item.setStatus("1");//状态
+            item.setIsDefault("1");//是否默认
+            item.setNum(99999);//库存数量
+            item.setSpec("{}");
+            setItemValues(goods,item);
+            itemMapper.insert(item);
+        }
+    }
 
-	
-	/**
-	 * 修改
-	 */
-	@Override
-	public void update(TbGoods goods){
-		goodsMapper.updateByPrimaryKeySelective(goods);
-	}	
-	
-	/**
-	 * 根据ID获取实体
-	 * @param id
-	 * @return
-	 */
-	@Override
-	public TbGoods findOne(Long id){
-		return goodsMapper.selectByPrimaryKey(id);
-	}
+    private void setItemValues(Goods goods, TbItem item) {
+        //2.设置item表中的商品图片,spu的第一张(获取的goodsDesc是json数组形式)
+        List<Map> imgList = JSON.parseArray(goods.getGoodsDesc().getItemImages(), Map.class);
+        if (imgList.size() > 0) {
+            item.setImage(imgList.get(0).get("url").toString());//设置商品描述图片
+        }
+        //3.设置item表中商品类目id[非空]
+        item.setCategoryid(goods.getGoods().getCategory3Id());
+        TbItemCat itemCat = itemCatMapper.selectByPrimaryKey(goods.getGoods().getCategory3Id());
+        item.setCategory(itemCat.getName());//分类名称
+        //4.设置item表中创建日期
+        item.setCreateTime(new Date());
+        //5.设置更新日期
+        item.setUpdateTime(new Date());
+        //6.所属SPU商品id
+        item.setGoodsId(goods.getGoods().getId());
+        //7.设置item表中所属商家 ==>seller
+        item.setSellerId(goods.getGoods().getSellerId());
+        TbSeller seller = sellerMapper.selectByPrimaryKey(goods.getGoods().getSellerId());
+        item.setSeller(seller.getNickName());
+        //8.设置item表中品牌信息 ==>brand
+        TbBrand brand = brandMapper.selectByPrimaryKey(goods.getGoods().getBrandId());
+        item.setBrand(brand.getName());
+    }
 
-	/**
-	 * 批量删除
-	 */
-	@Override
-	public void delete(Long[] ids) {
-		//数组转list
+    /**
+     * 修改
+     */
+    @Override
+    public void update(TbGoods goods) {
+        goodsMapper.updateByPrimaryKeySelective(goods);
+    }
+
+    /**
+     * 根据ID获取实体
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public TbGoods findOne(Long id) {
+        return goodsMapper.selectByPrimaryKey(id);
+    }
+
+    /**
+     * 批量删除
+     */
+    @Override
+    public void delete(Long[] ids) {
+        //数组转list
         List longs = Arrays.asList(ids);
         //构建查询条件
         Example example = new Example(TbGoods.class);
@@ -105,54 +169,54 @@ public class GoodsServiceImpl implements GoodsService {
 
         //跟据查询条件删除数据
         goodsMapper.deleteByExample(example);
-	}
-	
-	
-	@Override
-	public PageResult findPage(TbGoods goods, int pageNum, int pageSize) {
-		PageResult<TbGoods> result = new PageResult<TbGoods>();
+    }
+
+    @Override
+    public PageResult findPage(TbGoods goods, int pageNum, int pageSize) {
+        PageResult<TbGoods> result = new PageResult<TbGoods>();
         //设置分页条件
         PageHelper.startPage(pageNum, pageSize);
 
         //构建查询条件
         Example example = new Example(TbGoods.class);
         Example.Criteria criteria = example.createCriteria();
-		
-		if(goods!=null){			
-						//如果字段不为空
-			if (goods.getSellerId()!=null && goods.getSellerId().length()>0) {
-				criteria.andLike("sellerId", "%" + goods.getSellerId() + "%");
-			}
-			//如果字段不为空
-			if (goods.getGoodsName()!=null && goods.getGoodsName().length()>0) {
-				criteria.andLike("goodsName", "%" + goods.getGoodsName() + "%");
-			}
-			//如果字段不为空
-			if (goods.getAuditStatus()!=null && goods.getAuditStatus().length()>0) {
-				criteria.andLike("auditStatus", "%" + goods.getAuditStatus() + "%");
-			}
-			//如果字段不为空
-			if (goods.getIsMarketable()!=null && goods.getIsMarketable().length()>0) {
-				criteria.andLike("isMarketable", "%" + goods.getIsMarketable() + "%");
-			}
-			//如果字段不为空
-			if (goods.getCaption()!=null && goods.getCaption().length()>0) {
-				criteria.andLike("caption", "%" + goods.getCaption() + "%");
-			}
-			//如果字段不为空
-			if (goods.getSmallPic()!=null && goods.getSmallPic().length()>0) {
-				criteria.andLike("smallPic", "%" + goods.getSmallPic() + "%");
-			}
-			//如果字段不为空
-			if (goods.getIsEnableSpec()!=null && goods.getIsEnableSpec().length()>0) {
-				criteria.andLike("isEnableSpec", "%" + goods.getIsEnableSpec() + "%");
-			}
-			//如果字段不为空
-			if (goods.getIsDelete()!=null && goods.getIsDelete().length()>0) {
-				criteria.andLike("isDelete", "%" + goods.getIsDelete() + "%");
-			}
-	
-		}
+
+        if (goods != null) {
+            //如果字段不为空
+            if (goods.getSellerId() != null && goods.getSellerId().length() > 0) {
+                //criteria.andLike("sellerId", "%" + goods.getSellerId() + "%");
+                criteria.andEqualTo("sellerId", goods.getSellerId());
+            }
+            //如果字段不为空
+            if (goods.getGoodsName() != null && goods.getGoodsName().length() > 0) {
+                criteria.andLike("goodsName", "%" + goods.getGoodsName() + "%");
+            }
+            //如果字段不为空
+            if (goods.getAuditStatus() != null && goods.getAuditStatus().length() > 0) {
+                criteria.andLike("auditStatus", "%" + goods.getAuditStatus() + "%");
+            }
+            //如果字段不为空
+            if (goods.getIsMarketable() != null && goods.getIsMarketable().length() > 0) {
+                criteria.andLike("isMarketable", "%" + goods.getIsMarketable() + "%");
+            }
+            //如果字段不为空
+            if (goods.getCaption() != null && goods.getCaption().length() > 0) {
+                criteria.andLike("caption", "%" + goods.getCaption() + "%");
+            }
+            //如果字段不为空
+            if (goods.getSmallPic() != null && goods.getSmallPic().length() > 0) {
+                criteria.andLike("smallPic", "%" + goods.getSmallPic() + "%");
+            }
+            //如果字段不为空
+            if (goods.getIsEnableSpec() != null && goods.getIsEnableSpec().length() > 0) {
+                criteria.andLike("isEnableSpec", "%" + goods.getIsEnableSpec() + "%");
+            }
+            //如果字段不为空
+            if (goods.getIsDelete() != null && goods.getIsDelete().length() > 0) {
+                criteria.andLike("isDelete", "%" + goods.getIsDelete() + "%");
+            }
+
+        }
 
         //查询数据
         List<TbGoods> list = goodsMapper.selectByExample(example);
@@ -162,8 +226,8 @@ public class GoodsServiceImpl implements GoodsService {
         //获取总记录数
         PageInfo<TbGoods> info = new PageInfo<TbGoods>(list);
         result.setTotal(info.getTotal());
-		
-		return result;
-	}
-	
+
+        return result;
+    }
+
 }

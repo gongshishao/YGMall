@@ -18,44 +18,31 @@ import java.util.List;
 
 public class Goods implements Serializable {
     //商品SPU
-    private TbGoods tbGoods;
+    private TbGoods goods;
 
     //商品描述
-    private TbGoodsDesc tbGoodsDesc;
+    private TbGoodsDesc goodsDesc;
 
     //商品SKU列表
     private List<TbItem> itemList;
 
-    public TbGoods getTbGoods() {
-        return tbGoods;
+    public TbGoods getGoods() {
+        return goods;
     }
-
-    public void setTbGoods(TbGoods tbGoods) {
-        this.tbGoods = tbGoods;
+    public void setGoods(TbGoods goods) {
+        this.goods = goods;
     }
-
-    public TbGoodsDesc getTbGoodsDesc() {
-        return tbGoodsDesc;
+    public TbGoodsDesc getGoodsDesc() {
+        return goodsDesc;
     }
-
-    public void setTbGoodsDesc(TbGoodsDesc tbGoodsDesc) {
-        this.tbGoodsDesc = tbGoodsDesc;
+    public void setGoodsDesc(TbGoodsDesc goodsDesc) {
+        this.goodsDesc = goodsDesc;
     }
-
     public List<TbItem> getItemList() {
         return itemList;
     }
-
     public void setItemList(List<TbItem> itemList) {
         this.itemList = itemList;
     }
 
-    @Override
-    public String toString() {
-        return "Goods{" +
-                "tbGoods=" + tbGoods +
-                ", tbGoodsDesc=" + tbGoodsDesc +
-                ", itemList=" + itemList +
-                '}';
-    }
 }
