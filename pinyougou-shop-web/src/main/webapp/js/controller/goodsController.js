@@ -1,5 +1,5 @@
 //控制层
-app.controller('goodsController', function ($scope, $controller, itemCatService, goodsService, typeTemplateService, uploadService) {
+app.controller('goodsController', function ($scope, $controller, $location, itemCatService, goodsService, typeTemplateService, uploadService) {
 
     $controller('baseController', {$scope: $scope});//继承
 
@@ -22,20 +22,56 @@ app.controller('goodsController', function ($scope, $controller, itemCatService,
         );
     }
 
-    //查询实体
+    //查询实体,改写商品的查询方法
     $scope.findOne = function (id) {
+        var id = $location.search()['id'];//获取参数值
+        if (id == null) {
+            return;
+        }//如果有id才查询实体
         goodsService.findOne(id).success(
             function (response) {
                 $scope.entity = response;
+                //回显富文本编辑器中的内容
+                editor.html($scope.entity.goodsDesc.introduction);
+                //回显图片列表
+                $scope.entity.goodsDesc.itemImages = JSON.parse($scope.entity.goodsDesc.itemImages);
+                //回显扩展属性(此处与$scope.$watch中根据模板id更新扩展属性的方法冲突,被覆盖了)
+                $scope.entity.goodsDesc.customAttributeItems = JSON.parse($scope.entity.goodsDesc.customAttributeItems);
+                //回显规格属性
+                $scope.entity.goodsDesc.specificationItems = JSON.parse($scope.entity.goodsDesc.specificationItems);
+                //回显SKU列表
+                for (var i = 0; i <$scope.entity.itemList.length ; i++) {
+                    $scope.entity.itemList[i].spec = JSON.parse($scope.entity.itemList[i].spec);
+                }
+
             }
-        );
+        )
     }
 
-    //保存
+    //回显商品规格属性勾选情况
+    $scope.checkAttributeValue = function (specName,optionName) {
+        var spec = $scope.searchObjectByKey($scope.entity.goodsDesc.specificationItems, 'attributeName', specName);
+        if(spec == null ){
+            return false;
+        }else{
+            //如果找到了相应规格项，注意此处是>=0
+            if(spec.attributeValue.indexOf(optionName) >= 0){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
+    //保存,修改
     $scope.save = function () {
+        //读取富文本中的内容
         $scope.entity.goodsDesc.introduction = editor.html();
         var serviceObject;//服务层对象
-        if ($scope.entity.id != null) {//如果有ID
+        if ($scope.entity.goods.id != null) {//如果有ID
             serviceObject = goodsService.update($scope.entity); //修改
         } else {
             serviceObject = goodsService.add($scope.entity);//增加
@@ -44,29 +80,11 @@ app.controller('goodsController', function ($scope, $controller, itemCatService,
             function (response) {
                 if (response.success) {
                     alert(response.message);
-                    //重新查询
                     //清空实体
                     $scope.entity = {};
-                    editor.html('');//清空富文本编辑器
-                    $scope.reloadList();//重新加载
+                    location.href="goods.html";//跳转到商品列表页
+
                 } else {
-                    alert(response.message);
-                }
-            }
-        );
-    }
-
-    //增加商品
-    $scope.add=function(){
-        $scope.entity.goodsDesc.introduction=editor.html();
-
-        goodsService.add( $scope.entity  ).success(
-            function(response){
-                if(response.success){
-                    alert("新增成功");
-                    $scope.entity={};
-                    editor.html("");//清空富文本编辑器
-                }else{
                     alert(response.message);
                 }
             }
@@ -86,9 +104,9 @@ app.controller('goodsController', function ($scope, $controller, itemCatService,
         );
     }
 
+    $scope.searchEntity = {};//定义搜索对象
     //搜索
     $scope.search = function (page, rows) {
-        $scope.searchEntity = {};//定义搜索对象
         goodsService.search(page, rows, $scope.searchEntity).success(
             function (response) {
                 $scope.list = response.rows;
@@ -157,7 +175,7 @@ app.controller('goodsController', function ($scope, $controller, itemCatService,
         })
     });
 
-    //根据模板id，更新品牌列表,规格列表
+    //根据模板id，更新品牌列表,扩展属性,规格列表
     $scope.$watch("entity.goods.typeTemplateId", function (newValue, oldValue) {
 
         typeTemplateService.findOne(newValue).success(function (response) {
@@ -165,7 +183,10 @@ app.controller('goodsController', function ($scope, $controller, itemCatService,
             $scope.typeTemplate.brandIds = JSON.parse(response.brandIds);
 
             //在用户更新模板ID时，读取模板中的扩展属性赋给商品的扩展属性。
-            $scope.entity.goodsDesc.customAttributeItems = JSON.parse(response.customAttributeItems);
+            //如果没有ID，则加载模板中的扩展数据 ==>解决与findOne中回显读取数据发生冲突的问题
+            if ($location.search()['id'] == null) {
+                $scope.entity.goodsDesc.customAttributeItems = JSON.parse(response.customAttributeItems);
+            }
             //获得规格列表
             typeTemplateService.findSpecList(newValue).success(
                 function (response) {
@@ -216,9 +237,9 @@ app.controller('goodsController', function ($scope, $controller, itemCatService,
         // 2. 	查找遍历所有已选择的规格列表，后续会重复使用它，所以我们可以抽取出个变量items
         var items = $scope.entity.goodsDesc.specificationItems;
         // 9. 	回到createItemList方法中，在循环中调用addColumn方法，并让itemList重新指向返回结果;
-        for (var i = 0; i <items.length ; i++) {
+        for (var i = 0; i < items.length; i++) {
             //循环添加列
-            $scope.entity.itemList = addColumn($scope.entity.itemList,items[i].attributeName,items[i].attributeValue);
+            $scope.entity.itemList = addColumn($scope.entity.itemList, items[i].attributeName, items[i].attributeValue);
         }
     }
 
@@ -242,15 +263,15 @@ app.controller('goodsController', function ($scope, $controller, itemCatService,
         return newList;
     }
     //添加商品状态数组
-    $scope.status=['未审核','已审核','审核未通过','关闭'];//商品状态
+    $scope.status = ['未审核', '已审核', '审核未通过', '关闭'];//商品状态
 
-    $scope.itemCatList=[];//商品分类列表
+    $scope.itemCatList = [];//商品分类列表
     //加载商品分类列表
-    $scope.findItemCatList=function(){
+    $scope.findItemCatList = function () {
         itemCatService.findAll().success(
-            function(response){
-                for(var i=0;i<response.length;i++){
-                    $scope.itemCatList[response[i].id]=response[i].name;//将分类名赋予id
+            function (response) {
+                for (var i = 0; i < response.length; i++) {
+                    $scope.itemCatList[response[i].id] = response[i].name;//将分类名赋予id
                 }
             }
         );

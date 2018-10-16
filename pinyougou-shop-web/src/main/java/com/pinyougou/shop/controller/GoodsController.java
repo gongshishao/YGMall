@@ -67,30 +67,38 @@ public class GoodsController {
     }
 
     /**
-     * 修改
+     * 修改,修改之前先判断是否是具有商家权限
      *
      * @param goods
      * @return
      */
     @RequestMapping("/update")
-    public Result update(@RequestBody TbGoods goods) {
+    public Result update(@RequestBody Goods goods) {
+        //验证修改权限，商家只能修改自己的商品
+        Goods beUpdate = goodsService.findOne(goods.getGoods().getId());
+        //已登录的商家
+        String sellerId = SecurityContextHolder.getContext().getAuthentication().getName();
+        if ( !sellerId.equals(goods.getGoods().getSellerId()) || !sellerId.equals(beUpdate.getGoods().getSellerId()) ) {
+            //如果当前修改的商品不是当前登录商家的,提示操作非法
+            new Result(false, "当前操作非法");
+        }
         try {
             goodsService.update(goods);
             return new Result(true, "修改成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("修改商品失败,原因是:" + e);
             return new Result(false, "修改失败");
         }
     }
 
     /**
-     * 获取实体
+     * 根据商品id查询商品包装类SPU
      *
      * @param id
      * @return
      */
     @RequestMapping("/findOne")
-    public TbGoods findOne(Long id) {
+    public Goods findOne(Long id) {
         return goodsService.findOne(id);
     }
 

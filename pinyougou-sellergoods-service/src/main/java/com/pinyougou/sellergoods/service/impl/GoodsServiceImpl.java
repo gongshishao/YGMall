@@ -81,6 +81,14 @@ public class GoodsServiceImpl implements GoodsService {
         goods.getGoodsDesc().setGoodsId(goods.getGoods().getId());//设置商品描述id
         goodsDescMapper.insertSelective(goods.getGoodsDesc());
         //3.保存sku ==>item
+        saveItemList(goods);
+    }
+
+    /**
+     * 抽取保存商品SKU代码
+     * @param goods
+     */
+    private void saveItemList(Goods goods) {
         //勾选了启用规格蔡需要保存sku
         if ("1".equals(goods.getGoods().getIsEnableSpec())) {
             for (TbItem item : goods.getItemList()) {
@@ -111,6 +119,11 @@ public class GoodsServiceImpl implements GoodsService {
         }
     }
 
+    /**
+     * 抽取设置item代码
+     * @param goods
+     * @param item
+     */
     private void setItemValues(Goods goods, TbItem item) {
         //2.设置item表中的商品图片,spu的第一张(获取的goodsDesc是json数组形式)
         List<Map> imgList = JSON.parseArray(goods.getGoodsDesc().getItemImages(), Map.class);
@@ -140,8 +153,19 @@ public class GoodsServiceImpl implements GoodsService {
      * 修改
      */
     @Override
-    public void update(TbGoods goods) {
-        goodsMapper.updateByPrimaryKeySelective(goods);
+    public void update(Goods goods) {
+        //1.修改过的商品，状态设置为未审核，重新审核一次
+        goods.getGoods().setAuditStatus("0");//设置发布商品状态为未审核
+        //修改商品基本信息
+        goodsMapper.updateByPrimaryKeySelective(goods.getGoods());
+        //2.修改商品描述信息
+        goodsDescMapper.updateByPrimaryKeySelective(goods.getGoodsDesc());
+        //3.更新sku ==>item,更新sku信息，更新前先删除原来的sku
+        TbItem item = new TbItem();
+        item.setGoodsId(goods.getGoods().getId());
+        itemMapper.delete(item);
+        //保存新的sku
+        saveItemList(goods);
     }
 
     /**
@@ -151,8 +175,18 @@ public class GoodsServiceImpl implements GoodsService {
      * @return
      */
     @Override
-    public TbGoods findOne(Long id) {
-        return goodsMapper.selectByPrimaryKey(id);
+    public Goods findOne(Long id) {
+        Goods goods = new Goods();
+        TbGoods tbGoods = goodsMapper.selectByPrimaryKey(id);
+        goods.setGoods(tbGoods);
+        TbGoodsDesc goodsDesc = goodsDescMapper.selectByPrimaryKey(id);
+        goods.setGoodsDesc(goodsDesc);
+        //根据goodsId查询item
+        TbItem item = new TbItem();
+        item.setGoodsId(id);
+        List<TbItem> items = itemMapper.select(item);
+        goods.setItemList(items);
+        return goods;
     }
 
     /**

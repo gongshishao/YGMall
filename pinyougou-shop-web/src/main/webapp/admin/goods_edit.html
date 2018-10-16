@@ -33,7 +33,7 @@
 
 </head>
 
-<body class="hold-transition skin-red sidebar-mini" ng-init="selectItemCat1List();" ng-app="pinyougou"
+<body class="hold-transition skin-red sidebar-mini" ng-init="selectItemCat1List();findOne()" ng-app="pinyougou"
       ng-controller="goodsController">
 
 <!-- 正文区域 -->
@@ -136,7 +136,7 @@
 
                         <div class="col-md-2 title rowHeight2x">售后服务</div>
                         <div class="col-md-10 data rowHeight2x">
-                            <textarea ng-model="entity.goods.saleService" rows="4" class="form-control"
+                            <textarea ng-model="entity.goodsDesc.saleService" rows="4" class="form-control"
                                       placeholder="售后服务"></textarea>
                         </div>
 
@@ -208,8 +208,8 @@
                         <div class="col-md-2 title">{{spec.text}}</div>
                         <div class="col-md-10 data">
 										<span ng-repeat="option in spec.options">
-											<input type="checkbox"
-                                                   ng-click="updateSpecAttribute($event,spec.text,option.optionName);createItemList()">{{option.optionName}}
+											<input type="checkbox" ng-click="updateSpecAttribute($event,spec.text,option.optionName);createItemList()"
+                                                ng-checked="checkAttributeValue(spec.text,option.optionName)">{{option.optionName}}
 										</span>
 
                         </div>
@@ -264,8 +264,9 @@
 
     </div>
     <div class="btn-toolbar list-toolbar">
-        <button ng-click="add()" class="btn btn-primary"><i class="fa fa-save"></i>保存</button>
-        <button class="btn btn-default">返回列表</button>
+        <button ng-click="save()" class="btn btn-primary"><i class="fa fa-save"></i>保存</button>
+        <!--<button class="btn btn-default">返回列表</button>-->
+        <a href="goods.html" class="btn btn-default">返回列表</a>
     </div>
 
 </section>

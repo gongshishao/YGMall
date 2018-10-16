@@ -73,6 +73,7 @@
     <dubbo:application name="pinyougou-shop-web" />
     <dubbo:registry address="zookeeper://192.168.25.129:2181"/>
     <dubbo:annotation package="com.pinyougou.shop.service" />
+    <dubbo:consumer timeout="5000" />
 
 
 </beans:beans>
