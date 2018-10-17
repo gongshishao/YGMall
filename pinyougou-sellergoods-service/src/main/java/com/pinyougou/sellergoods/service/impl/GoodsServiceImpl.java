@@ -190,10 +190,13 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     /**
-     * 批量删除
+     * 批量删除,逻辑删除,即Is_delete设置为1
      */
     @Override
     public void delete(Long[] ids) {
+        //设置商品删除状态
+        TbGoods record = new TbGoods();
+        record.setIsDelete("1");
         //数组转list
         List longs = Arrays.asList(ids);
         //构建查询条件
@@ -201,8 +204,8 @@ public class GoodsServiceImpl implements GoodsService {
         Example.Criteria criteria = example.createCriteria();
         criteria.andIn("id", longs);
 
-        //跟据查询条件删除数据
-        goodsMapper.deleteByExample(example);
+        //跟据查询条件逻辑删除数据
+        goodsMapper.updateByExampleSelective(record, example);
     }
 
     @Override
@@ -245,10 +248,13 @@ public class GoodsServiceImpl implements GoodsService {
             if (goods.getIsEnableSpec() != null && goods.getIsEnableSpec().length() > 0) {
                 criteria.andLike("isEnableSpec", "%" + goods.getIsEnableSpec() + "%");
             }
-            //如果字段不为空
-            if (goods.getIsDelete() != null && goods.getIsDelete().length() > 0) {
+
+            /*if (goods.getIsDelete() != null && goods.getIsDelete().length() > 0) {
                 criteria.andLike("isDelete", "%" + goods.getIsDelete() + "%");
-            }
+            }*/
+            //查询未删除的商品
+            criteria.andIsNull("isDelete");
+
 
         }
 
@@ -262,6 +268,27 @@ public class GoodsServiceImpl implements GoodsService {
         result.setTotal(info.getTotal());
 
         return result;
+    }
+
+    /**
+     * 运营商审核商品,改变商品状态
+     * @param ids --批量勾选的商品id
+     * @param status --审核后的状态码
+     * @return
+     */
+    @Override
+    public void updateStatus(Long[] ids, String status) {
+        //设置商品上架状态
+        TbGoods record = new TbGoods();
+        record.setAuditStatus(status);
+        //数组转list
+        List list = Arrays.asList(ids);
+        //根据ids查询商品
+        Example example = new Example(TbGoods.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andIn("id", list);
+        //根据条件更新状态
+        goodsMapper.updateByExampleSelective(record, example);
     }
 
 }
