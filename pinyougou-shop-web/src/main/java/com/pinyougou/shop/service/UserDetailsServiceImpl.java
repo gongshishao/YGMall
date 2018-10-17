@@ -42,6 +42,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             //返回真实存在的用户，让Security框架对配置用户与密码信息是否匹配
             return new User(username, seller.getPassword(), authorities);
         } else {
+            logger.info("商家登录失败,原因可能是非法登录:"+Exception.class);
             return null;
         }
     }

@@ -11,6 +11,7 @@ import com.pinyougou.pojogroup.Goods;
 import com.pinyougou.sellergoods.service.GoodsService;
 import entity.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -19,7 +20,8 @@ import java.util.*;
  *
  * @author Steven
  */
-@Service
+@Service(interfaceClass = GoodsService.class)
+@Transactional
 public class GoodsServiceImpl implements GoodsService {
 
     @Autowired

@@ -11,13 +11,15 @@ import com.pinyougou.pojo.TbBrand;
 import com.pinyougou.sellergoods.service.BrandService;
 import entity.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 /**
  * 品牌模块服务层实现类
  */
-@Service
+@Service(interfaceClass = BrandService.class)
+@Transactional
 public class BrandServiceImpl implements BrandService {
 
     //注入mapper数据访问对象
