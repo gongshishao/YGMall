@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>pinyougou-manager-web</artifactId>
+    <artifactId>pinyougou_content_service</artifactId>
     <packaging>war</packaging>
     <dependencies>
         <!-- Spring -->
@@ -79,37 +79,25 @@
             <artifactId>servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!--引入依赖商品interface-->
-        <dependency>
-            <groupId>com.pinyougou</groupId>
-            <artifactId>pinyougou-sellergoods-interface</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <!--依赖广告interface-->
+        <!--依赖interface-->
         <dependency>
             <groupId>com.pinyougou</groupId>
             <artifactId>pinyougou_content_interface</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-
-        <!--依赖common-->
+        <!--依赖dao-->
+        <dependency>
+            <groupId>com.pinyougou</groupId>
+            <artifactId>pinyougou-dao</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!--依赖common工具-->
         <dependency>
             <groupId>com.pinyougou</groupId>
             <artifactId>pinyougou-common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <!-- 身份验证 -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-        </dependency>
-
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -117,13 +105,12 @@
                 <artifactId>tomcat7-maven-plugin</artifactId>
                 <version>2.2</version>
                 <configuration>
-                    <!-- 指定端口 -->
-                    <port>8081</port>
-                    <!-- 请求路径 -->
+                    <port>82</port>
                     <path>/</path>
                     <uriEncoding>utf-8</uriEncoding>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 
