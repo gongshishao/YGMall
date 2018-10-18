@@ -8,9 +8,6 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
-    <artifactId>pinyougou_content_interface</artifactId>
-
     <dependencies>
         <dependency>
             <groupId>com.pinyougou</groupId>
@@ -18,6 +15,8 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
+
+    <artifactId>pinyougou_content_interface</artifactId>
 
 
 </project>

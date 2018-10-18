@@ -1,0 +1,1 @@
+var app=angular.module('pinyougou',['pagination']);//定义带分页的模板

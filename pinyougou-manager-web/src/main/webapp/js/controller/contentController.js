@@ -84,13 +84,10 @@ app.controller('contentController', function ($scope, $controller, contentServic
         uploadService.uploadFile().success(function (response) {
             //如果上传成功,绑定url到表单
             if (response.success) {
-                alert("上传成功");
                 $scope.entity.pic = response.message;
             } else {
                 alert(response.message);
             }
-        }).error(function () {
-            alert("上传发生错误");
         });
     }
 
