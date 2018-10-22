@@ -24,6 +24,11 @@ public class ItemSearchServiceImpl implements ItemSearchService {
     @Autowired
     private SolrTemplate solrTemplate;
 
+    /**
+     * 搜索核心方法
+     * @param searchMap 查询条件列表
+     * @return
+     */
     @Override
     public Map search(Map searchMap) {
         Map map = new HashMap();
