@@ -20,7 +20,7 @@
 
 </head>
 
-<body  ng-init="findByCategoryId(1)" ng-app="pinyougou" ng-controller="contentController">
+<body ng-init="findByCategoryId(1)" ng-app="pinyougou" ng-controller="contentController">
 <!-- 头部栏位 -->
 <!--页面顶部-->
 <div id="nav-bottom">
@@ -681,7 +681,7 @@
                     <div class="carousel-inner">
                         <div class="{{$index == 0 ? 'active' : ''}} item" ng-repeat="item in contentList[1]">
                             <a href="{{item.url}}">
-                                <img src="{{item.pic}}"  />
+                                <img src="{{item.pic}}"/>
                             </a>
                         </div>
                     </div>

@@ -17,6 +17,7 @@ import java.util.Map;
 
 /**
  * 前台搜索模块
+ *
  * @author admin13
  * @version 1.0
  * @description com.pinyougou.search.service.impl
@@ -34,24 +35,25 @@ public class ItemSearchServiceImpl implements ItemSearchService {
      * 搜索核心方法，需要实现以下优化
      * （1）搜索面板的商品分类需要使用Spring Data Solr的分组查询来实现
      * （2）为了能够提高查询速度，我们需要把查询面板的品牌、规格数据提前放入redis
-     *  将商品分类数据、品牌数据、和规格数据都放入Redis存储
+     * 将商品分类数据、品牌数据、和规格数据都放入Redis存储
+     *
      * @param searchMap 查询条件列表
      * @return
      */
     @Override
     public Map search(Map searchMap) {
-        Map<String,Object> map=new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         //1.按关键字查询（高亮显示）
         map.putAll(searchList(searchMap));
         //2.根据关键字查询商品分类
         List<String> categoryList = searchCategoryList(searchMap);
-        map.put("categoryList",categoryList);
+        map.put("categoryList", categoryList);
         //3.根据商品分类名称查询品牌与规格列表
-        String categoryName=(String)searchMap.get("category");
-        if(!"".equals(categoryName)){//如果有分类名称
+        String categoryName = (String) searchMap.get("category");
+        if (!"".equals(categoryName)) {//如果有分类名称
             map.putAll(searchBrandAndSpecList(categoryName));
-        }else{//如果没有分类名称，按照第一个查询
-            if(categoryList.size()>0){
+        } else {//如果没有分类名称，按照第一个查询
+            if (categoryList.size() > 0) {
                 map.putAll(searchBrandAndSpecList(categoryList.get(0)));
             }
         }
@@ -61,10 +63,11 @@ public class ItemSearchServiceImpl implements ItemSearchService {
 
     /**
      * 跟据商品分类名称查询商品品牌与规格列表
+     *
      * @param category 商品分类名称
      * @return
      */
-    private Map searchBrandAndSpecList(String category){
+    private Map searchBrandAndSpecList(String category) {
         Map map = new HashMap();
         //跟据商品分类名称查询模板id
         Long typeId = (Long) redisTemplate.boundHashOps("itemCat").get(category);
@@ -78,7 +81,6 @@ public class ItemSearchServiceImpl implements ItemSearchService {
         }
         return map;
     }
-
 
     /**
      * 查询分类列表-使用spring data solr的分组查询
@@ -114,7 +116,7 @@ public class ItemSearchServiceImpl implements ItemSearchService {
     }
 
     /**
-     * 抽取跟据关键字搜索数据列表的方法
+     * 抽取跟据关键字搜索数据列表
      *
      * @param searchMap
      * @return
@@ -133,33 +135,59 @@ public class ItemSearchServiceImpl implements ItemSearchService {
         query.addCriteria(criteria);
         //4.添加其他查询条件
         //4.1 按商品分类过滤
-        if(!"".equals(searchMap.get("category"))  )	{//如果用户选择了分类
-            FilterQuery filterQuery=new SimpleFilterQuery();
-            Criteria filterCriteria=new Criteria("item_category").is(searchMap.get("category"));
+        if (!"".equals(searchMap.get("category"))) {//如果用户选择了分类
+            FilterQuery filterQuery = new SimpleFilterQuery();
+            Criteria filterCriteria = new Criteria("item_category").is(searchMap.get("category"));
             filterQuery.addCriteria(filterCriteria);
             query.addFilterQuery(filterQuery);
         }
 
         //4.2按品牌过滤
-        if(!"".equals(searchMap.get("brand"))  )	{//如果用户选择了品牌
-            FilterQuery filterQuery=new SimpleFilterQuery();
-            Criteria filterCriteria=new Criteria("item_brand").is(searchMap.get("brand"));
+        if (!"".equals(searchMap.get("brand"))) {//如果用户选择了品牌
+            FilterQuery filterQuery = new SimpleFilterQuery();
+            Criteria filterCriteria = new Criteria("item_brand").is(searchMap.get("brand"));
             filterQuery.addCriteria(filterCriteria);
             query.addFilterQuery(filterQuery);
         }
         //4.3 按规格过滤
-        if(searchMap.get("spec")!=null){
-            Map<String,String> specMap= (Map<String, String>) searchMap.get("spec");
-            for(String key :specMap.keySet()){
+        if (searchMap.get("spec") != null) {
+            Map<String, String> specMap = (Map<String, String>) searchMap.get("spec");
+            for (String key : specMap.keySet()) {
 
-                FilterQuery filterQuery=new SimpleFilterQuery();
-                Criteria filterCriteria=new Criteria("item_spec_"+key).is( specMap.get(key)  );
+                FilterQuery filterQuery = new SimpleFilterQuery();
+                Criteria filterCriteria = new Criteria("item_spec_" + key).is(specMap.get(key));
                 filterQuery.addCriteria(filterCriteria);
                 query.addFilterQuery(filterQuery);
 
             }
 
         }
+        //4.3 按价格过滤
+        if (!"".equals(searchMap.get("price"))) {
+            String[] price = ((String) searchMap.get("price")).split("-");
+            if (!price[0].equals("0")) {//如果区间起点不等于0
+                Criteria filterCriteria = new Criteria("item_price").greaterThanEqual(price[0]);
+                FilterQuery filterQuery = new SimpleFilterQuery(filterCriteria);
+                query.addFilterQuery(filterQuery);
+            }
+            if (!price[1].equals("*")) {//如果区间终点不等于*
+                Criteria filterCriteria = new Criteria("item_price").lessThanEqual(price[1]);
+                FilterQuery filterQuery = new SimpleFilterQuery(filterCriteria);
+                query.addFilterQuery(filterQuery);
+            }
+        }
+        //4.4 分页查询
+        Integer pageNo= (Integer) searchMap.get("pageNo");//提取页码
+        if(pageNo==null){
+            pageNo=1;//默认第一页
+        }
+        Integer pageSize=(Integer) searchMap.get("pageSize");//每页记录数
+        if(pageSize==null){
+            pageSize=20;//默认20
+        }
+        query.setOffset((pageNo-1)*pageSize);//从第几条记录查询
+        query.setRows(pageSize);
+
 
         //5.   接收solrTemplate.queryForHighlightPage的返回数据，定义page变量
         HighlightPage<SolrItem> page = solrTemplate.queryForHighlightPage(query, SolrItem.class);
@@ -174,6 +202,8 @@ public class ItemSearchServiceImpl implements ItemSearchService {
         }
         //7.   在循环完成外map.put("rows", page.getContent())返回数据列表
         map.put("rows", page.getContent());
+        map.put("totalPages", page.getTotalPages());//返回总页数
+        map.put("total", page.getTotalElements());//返回总记录数
         return map;
     }
 
