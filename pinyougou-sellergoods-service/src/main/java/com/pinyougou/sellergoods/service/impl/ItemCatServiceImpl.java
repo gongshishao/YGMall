@@ -3,18 +3,19 @@ package com.pinyougou.sellergoods.service.impl;
 import java.util.Arrays;
 import java.util.List;
 
+import com.alibaba.dubbo.common.logger.Logger;
+import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.pinyougou.mapper.TbTypeTemplateMapper;
-import com.pinyougou.pojo.TbTypeTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.abel533.entity.Example;
 import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.pinyougou.mapper.TbItemCatMapper;
 import com.pinyougou.pojo.TbItemCat;
 import com.pinyougou.sellergoods.service.ItemCatService;
 import entity.PageResult;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -25,12 +26,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Service(interfaceClass = ItemCatService.class)
 @Transactional
 public class ItemCatServiceImpl implements ItemCatService {
-
+    private static final Logger log = LoggerFactory.getLogger(ItemCatServiceImpl.class);
     @Autowired
     private TbItemCatMapper itemCatMapper;
 
     @Autowired
     private TbTypeTemplateMapper typeTemplateMapper;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 查询全部
@@ -142,8 +146,17 @@ public class ItemCatServiceImpl implements ItemCatService {
      */
     @Override
     public List<TbItemCat> findByParentId(Long parentId) {
-        TbItemCat itemCat = new TbItemCat();
-        itemCat.setParentId(parentId);
-        return itemCatMapper.select(itemCat);
+        TbItemCat where = new TbItemCat();
+        where.setParentId(parentId);
+        //查询数据
+        List<TbItemCat> catList = itemCatMapper.select(where);
+        //将商品分类数据放入缓存（Hash）。以分类名称作为key ,以模板ID作为值
+        //在这里写的原因是商品分类增删改都会经过这个方法
+        List<TbItemCat> itemCats = findAll();
+        for (TbItemCat itemCat : itemCats) {
+            redisTemplate.boundHashOps("itemCat").put(itemCat.getName(), itemCat.getTypeId());
+        }
+        log.info("商品分类数据存入缓存！");
+        return catList;
     }
 }

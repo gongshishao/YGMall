@@ -1,5 +1,7 @@
 package com.pinyougou.sellergoods.service.impl;
 
+import com.alibaba.dubbo.common.logger.Logger;
+import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.github.abel533.entity.Example;
@@ -12,6 +14,7 @@ import com.pinyougou.pojo.TbTypeTemplate;
 import com.pinyougou.sellergoods.service.TypeTemplateService;
 import entity.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -26,12 +29,15 @@ import java.util.Map;
 @Service(interfaceClass = TypeTemplateService.class)
 @Transactional
 public class TypeTemplateServiceImpl implements TypeTemplateService {
-
+    private static final Logger log = LoggerFactory.getLogger(ItemCatServiceImpl.class);
     @Autowired
     private TbTypeTemplateMapper typeTemplateMapper;
 
     @Autowired
     private TbSpecificationOptionMapper optionMapper;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 查询全部
@@ -39,6 +45,23 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
     @Override
     public List<TbTypeTemplate> findAll() {
         return typeTemplateMapper.select(null);
+    }
+
+    /**
+     * 将上面查询全部得到数据放入缓存
+     */
+    private void saveToRedis(){
+        //分别将品牌数据和规格数据放入缓存（Hash）。以模板ID作为key,以品牌列表和规格列表作为值。
+        List<TbTypeTemplate> templates = findAll();
+        for (TbTypeTemplate template : templates) {
+            //缓存品牌列表
+            List<Map> brandList = JSON.parseArray(template.getBrandIds(), Map.class);
+            redisTemplate.boundHashOps("brandList").put(template.getId(), brandList);
+            //缓存规格列表
+            List<Map> specList = findSpecList(template.getId());
+            redisTemplate.boundHashOps("specList").put(template.getId(), specList);
+        }
+        log.info("品牌列表和规格列表存入缓存！");
     }
 
     /**
@@ -143,7 +166,7 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
         //获取总记录数
         PageInfo<TbTypeTemplate> info = new PageInfo<TbTypeTemplate>(list);
         result.setTotal(info.getTotal());
-
+        saveToRedis();//把数据放入缓存
         return result;
     }
 
@@ -164,5 +187,8 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
         }
         return list;
     }
+
+
+
 
 }
