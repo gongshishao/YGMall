@@ -89,7 +89,7 @@
         <!--依赖商品接口-->
         <dependency>
             <groupId>com.pinyougou</groupId>
-            <artifactId>pinyougou-sellergoods-interface</artifactId>
+            <artifactId>pinyougou_search_interface</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <!-- springSecurity身份验证 -->

@@ -17,6 +17,8 @@
         <module name="pinyougou_content_service" />
         <module name="pinyougou_portal_web" />
         <module name="pinyougou_search_interface" />
+        <module name="pinyougou_search_service" />
+        <module name="pinyougou_search_web" />
         <module name="pinyougou_solr_util" />
         <module name="pinyougou_user_interface" />
         <module name="pinyougou_user_service" />
