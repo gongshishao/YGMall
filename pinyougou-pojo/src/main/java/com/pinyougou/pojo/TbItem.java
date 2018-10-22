@@ -1,8 +1,12 @@
 package com.pinyougou.pojo;
 
+import org.apache.solr.client.solrj.beans.Field;
+import org.springframework.data.solr.core.mapping.Dynamic;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 import javax.persistence.*;
 
 @Table(name = "tb_item")
