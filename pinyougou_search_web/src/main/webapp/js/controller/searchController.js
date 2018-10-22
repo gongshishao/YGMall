@@ -11,9 +11,9 @@ app.controller('searchController',function($scope,searchService){
 
     /**
      * 搜索对象
-     * @type {{keywords: 关键字, category: 商品分类, brand: 品牌, spec: {'网络'：'移动4G','机身内存':'64G'}}}
+     * @type {{keywords: 关键字, category: 商品分类, brand: 品牌, spec: {'网络'：'移动4G','机身内存':'64G'}，price:价格}}
      */
-    $scope.searchMap={'keywords':'','category':'','brand':'','spec':{}};
+    $scope.searchMap={'keywords':'','category':'','brand':'','spec':{},'price':''};
 
     /**
      * 添加搜索项
@@ -21,7 +21,7 @@ app.controller('searchController',function($scope,searchService){
      * @param value
      */
     $scope.addSearchItem=function(key,value){
-        if(key=="category" ||  key=="brand"){//如果是分类或品牌
+        if(key=="category" ||  key=="brand" || key=='price'){//如果是分类或品牌或价格
             $scope.searchMap[key]=value;
         }else{//否则是规格
             $scope.searchMap.spec[key]=value;
@@ -35,7 +35,7 @@ app.controller('searchController',function($scope,searchService){
      * @param key
      */
     $scope.removeSearchItem=function(key){
-        if(key=="category" ||  key=="brand"){//如果是分类或品牌
+        if(key=="category" ||  key=="brand" || key=='price'){//如果是分类或品牌或价格
             $scope.searchMap[key]="";
         }else{//否则是规格
             delete $scope.searchMap.spec[key];//移除此属性
