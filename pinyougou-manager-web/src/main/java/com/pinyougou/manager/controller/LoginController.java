@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 获取用户名回显
  * @author admin13
  * @version 1.0
  * @description com.pinyougou.manager.controller

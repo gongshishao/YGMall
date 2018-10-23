@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
+import com.pinyougou.page.service.ItemPageService;
 import com.pinyougou.pojo.TbItem;
 import com.pinyougou.pojogroup.Goods;
 import com.pinyougou.search.service.ItemSearchService;
@@ -38,6 +39,19 @@ public class GoodsController {
 
     @Reference
     private ItemSearchService itemSearchService;
+
+    @Reference(timeout=40000)
+    private ItemPageService itemPageService;
+
+    /**
+     * 生成静态页（测试）
+     * @param goodsId
+     */
+    @RequestMapping("/genHtml")
+    public boolean genHtml(Long goodsId) {
+        return itemPageService.genItemHtml(goodsId);
+    }
+
 
     /**
      * 返回全部列表

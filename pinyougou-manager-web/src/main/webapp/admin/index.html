@@ -34,9 +34,9 @@
 		  		iframeid.height =document.documentElement.clientHeight;			   	   
 			  }
 		 }
-    
-	</script>    
- 
+
+	</script>
+
 </head>
 
 <body class="hold-transition skin-green sidebar-mini" ng-app="pinyougou" ng-init="showLoginName()" ng-controller="indexController" >
@@ -271,7 +271,17 @@
 
                                     <p>
                                        {{loginName}}
-                                        <small>最后登录 11:20AM</small>
+                                        <!--<small>最后登录 (new Date()).getHours : (new Date()).getMinutes   AM</small>-->
+                                        <small>
+                                            <script language="JavaScript">
+                                                today=new Date();
+                                                document.write(
+                                                    "当前时间:",
+                                                    today.getHours(),":",
+                                                    today.getMinutes(),":",
+                                                    " AM</font>" );
+                                            </script>
+                                        </small>
                                     </p>
                                 </li>
                                 
