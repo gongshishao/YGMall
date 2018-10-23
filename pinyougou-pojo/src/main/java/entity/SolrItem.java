@@ -5,6 +5,7 @@ import org.springframework.data.solr.core.mapping.Dynamic;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -36,6 +37,11 @@ public class SolrItem implements Serializable {
     @Field("item_seller")
     private String seller;
 
+    @Field("item_updatetime")
+    private Date updateTime;
+
+
+
     @Dynamic
     @Field("item_spec_*")
     private Map<String,String> specMap;
@@ -48,7 +54,13 @@ public class SolrItem implements Serializable {
         this.specMap = specMap;
     }
 
+    public Date getUpdateTime() {
+        return updateTime;
+    }
 
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
     public Long getId() {
         return id;
     }

@@ -84,7 +84,7 @@
                                 <div class="input-append">
                                     <input type="text" id="autocomplete" ng-model="searchMap.keywords" type="text"
                                            class="input-error input-xxlarge"/>
-                                    <button class="sui-btn btn-xlarge btn-danger" ng-click="search()" type="button">搜索
+                                    <button class="sui-btn btn-xlarge btn-danger" ng-click="searchMap.pageNo=1;search()" type="button">搜索
                                     </button>
                                 </div>
                             </form>
@@ -150,7 +150,11 @@
     <div class="py-container">
         <!--bread面包屑展示-->
         <div class="bread">
-            <ul class="fl sui-breadcrumb">搜索条件：</ul>
+            <ul class="fl sui-breadcrumb">
+                <li>
+                    <a href="#">搜索条件：</a>
+                </li>
+            </ul>
             <ul class="tags-choose">
                 <li class="tag" ng-if="searchMap.category!=''" ng-click="removeSearchItem('category')">
                     商品分类：{{searchMap.category}}<i class="sui-icon icon-tb-close"></i></li>
@@ -160,6 +164,8 @@
                     {{key}}:{{value}}<i class="sui-icon icon-tb-close"></i></li>
                 <li class="tag" ng-if="searchMap.price!=''" ng-click="removeSearchItem('price')">
                     价格：{{searchMap.price}}<i class="sui-icon icon-tb-close"></i></li>
+
+                搜索结果：{{resultMap.total}}条
             </ul>
 
             <form class="fl sui-form form-dark">
@@ -185,7 +191,7 @@
                 <div class="fl ext"></div>
             </div>
             <!--加载品牌-->
-            <div class="type-wrap logo" ng-if="resultMap.brandList!=null && searchMap.brand==''">
+            <div class="type-wrap logo" ng-if="resultMap.brandList!=null && searchMap.brand=='' && keywordsIsBrand()==false">
                 <div class="fl key brand">品牌</div>
                 <div class="value logos">
                     <ul class="logo-list" ng-repeat="brand in resultMap.brandList ">
@@ -310,20 +316,25 @@
                 <div class="navbar-inner filter">
                     <ul class="sui-nav">
                         <li class="active">
-                            <a href="#">综合</a>
+                            <a href="#" ng-click="sortSearch('','')">综合</a>
                         </li>
                         <li>
                             <a href="#">销量</a>
                         </li>
                         <li>
-                            <a href="#">新品</a>
+                            <a href="#" ng-click="sortSearch('updatetime','DESC')">新品</a>
                         </li>
+
                         <li>
                             <a href="#">评价</a>
                         </li>
                         <li>
-                            <a href="#">价格</a>
+                            <a href="#" ng-click="sortSearch('price','ASC')">价格↑</a>
                         </li>
+                        <li>
+                            <a href="#" ng-click="sortSearch('price','DESC')">价格↓</a>
+                        </li>
+
                     </ul>
                 </div>
             </div>
@@ -364,16 +375,15 @@
                 <div class="sui-pagination pagination-large">
                     <ul>
                         <li class="prev {{isTopPage()?'disabled':''}}">
-                            <a href="#" ng-click="queryByPage(searchMap.pageNo-1)">«上一页</a>
+                            <a href="#" ng-click="queryByPage(searchMap.pageNo-1)">«</a>
                         </li>
                         <li class="dotted" ng-if="firstDot==true"><span>...</span></li>
-                        <li class="active" ng-repeat="p in pageLabel">
-                            <a href="#" ng-click="queryByPage(p)">{{p}}</a>
+                        <li ng-repeat="page in pageLabel">
+                            <a href="#" ng-click="queryByPage(page)">{{page}}</a>
                         </li>
                         <li class="dotted" ng-if="lastDot==true"><span>...</span></li>
-                        <!--<li class="dotted"><span>...</span></li>-->
                         <li class="next {{isEndPage()?'disabled':''}}">
-                            <a href="#" ng-click="queryByPage(searchMap.pageNo+1)">下一页»</a>
+                            <a href="#" ng-click="queryByPage(searchMap.pageNo+1)">»</a>
                         </li>
                     </ul>
                     <div>
@@ -382,7 +392,6 @@
                             到第 <input type="text" class="page-num" ng-model="searchMap.pageNo">页
 	                     <button class="page-confirm" ng-click="queryByPage(searchMap.pageNo)">确定</button>
                         </span>
-                        搜索结果：{{resultMap.total}}条记录
                     </div>
                 </div>
             </div>

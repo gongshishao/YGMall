@@ -1,7 +1,13 @@
 app.controller('searchController',function($scope,searchService){
+
+    /**
+     * 搜索对象
+     * @type {{keywords: 关键字, category: 商品分类, brand: 品牌, spec: {'网络'：'移动4G','机身内存':'64G'}，price:价格}}
+     */
+    $scope.searchMap={'keywords':'','category':'','brand':'','spec':{},'price':'','pageNo':1,'pageSize':40,'sort':'','sortField':''};
     //搜索
     $scope.search=function(){
-        $scope.searchMap.pageNo= parseInt($scope.searchMap.pageNo) ;
+        $scope.searchMap.pageNo= parseInt($scope.searchMap.pageNo) ;//搜索结果中的页码需要转成int数据类型，否则跳转页码的功能按钮会失效
         searchService.search( $scope.searchMap ).success(
             function(response){
                 //搜索返回的结果
@@ -11,22 +17,25 @@ app.controller('searchController',function($scope,searchService){
         );
     }
 
-    //根据页码查询
+
+    //判断关键字是不是品牌
+        $scope.keywordsIsBrand=function(){
+            for(var i=0;i<$scope.resultMap.brandList.length;i++){
+                if($scope.searchMap.keywords.indexOf($scope.resultMap.brandList[i].text)>=0){//如果包含
+                    return true;
+                }
+            }
+            return false;
+        }
+
+    //分页查询
     $scope.queryByPage=function(pageNo){
-        //页码验证
         if(pageNo<1 || pageNo>$scope.resultMap.totalPages){
-            return;
+            return ;
         }
         $scope.searchMap.pageNo=pageNo;
-        $scope.search();
+        $scope.search();//查询
     }
-
-
-    /**
-     * 搜索对象
-     * @type {{keywords: 关键字, category: 商品分类, brand: 品牌, spec: {'网络'：'移动4G','机身内存':'64G'}，price:价格}}
-     */
-    $scope.searchMap={'keywords':'','category':'','brand':'','spec':{},'price':'','pageNo':1,'pageSize':40};
 
     /**
      * 添加搜索项
@@ -56,25 +65,30 @@ app.controller('searchController',function($scope,searchService){
         $scope.search();//执行搜索
     }
 
-    buildPageLabel=function () {
-        //分页栏
-        $scope.pageLable=[];
-        var firstPage = 1; //开始页码
-        var lastPage = $scope.resultMap.totalPages;  //截止页码
-        $scope.firstDot=true;//前面有点
-        $scope.lastDot=true;//后边有点
-        //如果总页数 > 5
-        if($scope.resultMap.totalPages > 5){
-            //如果当前页码 <= 3，显示前5页
-            if($scope.searchMap.pageNo < 3){
-                lastPage = 5;
-                $scope.firstDot=false;//前面没点
-                //如果当前页码 >= (总页数-2)，显示后5页
-            }else if($scope.searchMap.pageNo > ($scope.resultMap.totalPages - 2)){
-                firstPage = $scope.resultMap.totalPages - 4;
+    //设置排序规则
+    $scope.sortSearch=function(sortField,sort){
+        $scope.searchMap.sortField=sortField;
+        $scope.searchMap.sort=sort;
+        $scope.search();
+    }
+
+
+    //构建分页栏
+    buildPageLabel=function(){
+        //构建分页栏
+        $scope.pageLabel=[];
+        var firstPage=1;//开始页码
+        var lastPage=$scope.resultMap.totalPages;//截止页码
+        $scope.firstDot=true;//默认前面有点
+        $scope.lastDot=true;//默认后边有点
+        if($scope.resultMap.totalPages>5){  //如果页码数量大于5
+            if($scope.searchMap.pageNo<=3){//并且当前页码小于等于3 ，显示前5页
+                lastPage=5;
+                $scope.firstDot=false;//并且前面没点
+            }else if( $scope.searchMap.pageNo>= $scope.resultMap.totalPages-2 ){//显示后5页
+                firstPage=$scope.resultMap.totalPages-4;
                 $scope.lastDot=false;//后边没点
-            }else{
-                //显示当前页为中心的5个页码
+            }else{  //显示以当前页为中心的5页
                 firstPage=$scope.searchMap.pageNo-2;
                 lastPage=$scope.searchMap.pageNo+2;
             }
@@ -82,8 +96,9 @@ app.controller('searchController',function($scope,searchService){
             $scope.firstDot=false;//前面无点
             $scope.lastDot=false;//后边无点
         }
-        for(var i = firstPage; i <= lastPage; i++){
-            $scope.pageLable.push(i);
+        //构建页码
+        for(var i=firstPage;i<=lastPage;i++){
+            $scope.pageLabel.push(i);
         }
     }
 

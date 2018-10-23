@@ -5,6 +5,7 @@ import com.pinyougou.search.service.ItemSearchService;
 import entity.SolrItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.*;
@@ -44,6 +45,9 @@ public class ItemSearchServiceImpl implements ItemSearchService {
     public Map search(Map searchMap) {
         Map<String, Object> map = new HashMap<>();
         //1.按关键字查询（高亮显示）
+        //关键词空格处理
+        String keywords = (String) searchMap.get("keywords");
+        searchMap.put("keywords", keywords.replace(" ", ""));
         map.putAll(searchList(searchMap));
         //2.根据关键字查询商品分类
         List<String> categoryList = searchCategoryList(searchMap);
@@ -131,8 +135,10 @@ public class ItemSearchServiceImpl implements ItemSearchService {
         options.setSimplePostfix("</em>");
         query.setHighlightOptions(options);
         //3.组装查询条件，搜索框输入关键字查询
-        Criteria criteria = new Criteria("item_keywords").is(searchMap.get("keywords"));
-        query.addCriteria(criteria);
+        if (searchMap.get("keywords") != null) {
+            Criteria criteria = new Criteria("item_keywords").is(searchMap.get("keywords"));
+            query.addCriteria(criteria);
+        }
         //4.添加其他查询条件
         //4.1 按商品分类过滤
         if (!"".equals(searchMap.get("category"))) {//如果用户选择了分类
@@ -188,6 +194,19 @@ public class ItemSearchServiceImpl implements ItemSearchService {
         query.setOffset((pageNo-1)*pageSize);//从第几条记录查询
         query.setRows(pageSize);
 
+        //4.5排序
+        String sortValue= (String) searchMap.get("sort");//ASC  DESC
+        String sortField= (String) searchMap.get("sortField");//排序字段
+        if(sortValue!=null && !sortValue.equals("")){
+            if(sortValue.equals("ASC")){
+                Sort sort=new Sort(Sort.Direction.ASC, "item_"+sortField);
+                query.addSort(sort);
+            }
+            if(sortValue.equals("DESC")){
+                Sort sort=new Sort(Sort.Direction.DESC, "item_"+sortField);
+                query.addSort(sort);
+            }
+        }
 
         //5.   接收solrTemplate.queryForHighlightPage的返回数据，定义page变量
         HighlightPage<SolrItem> page = solrTemplate.queryForHighlightPage(query, SolrItem.class);
@@ -195,8 +214,8 @@ public class ItemSearchServiceImpl implements ItemSearchService {
         //item.setTitle(h.getHighlights().get(0).getSnipplets().get(0))，在设置高亮之前最好判断一下;
         for (HighlightEntry<SolrItem> h : page.getHighlighted()) {
             SolrItem item = h.getEntity();
-            //设置高亮数据
-            if (h.getHighlights().size() > 0 && h.getHighlights().get(0).getSnipplets().size() > 0) {
+            //设置高亮数据,先判断是否有高亮数据
+            if (h.getHighlights()!=null && h.getHighlights().size() > 0 && h.getHighlights().get(0).getSnipplets()!=null && h.getHighlights().get(0).getSnipplets().size() > 0) {
                 item.setTitle(h.getHighlights().get(0).getSnipplets().get(0));
             }
         }
@@ -206,5 +225,7 @@ public class ItemSearchServiceImpl implements ItemSearchService {
         map.put("total", page.getTotalElements());//返回总记录数
         return map;
     }
+
+    
 
 }
