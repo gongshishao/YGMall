@@ -1,9 +1,17 @@
 package com.pinyougou.manager.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import com.alibaba.fastjson.JSON;
+import com.pinyougou.pojo.TbItem;
 import com.pinyougou.pojogroup.Goods;
+import com.pinyougou.search.service.ItemSearchService;
+import entity.SolrItem;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,6 +35,9 @@ public class GoodsController {
 
     @Reference
     private GoodsService goodsService;
+
+    @Reference
+    private ItemSearchService itemSearchService;
 
     /**
      * 返回全部列表
@@ -94,7 +105,7 @@ public class GoodsController {
     }
 
     /**
-     * 批量删除
+     * 批量删除，删除商品时把solr索引库对应的索引也删除
      *
      * @param ids
      * @return
@@ -103,6 +114,8 @@ public class GoodsController {
     public Result delete(Long[] ids) {
         try {
             goodsService.delete(ids);
+            itemSearchService.deleteByGoodsIds(ids);
+            logger.info("删除商品同步删除索引");
             return new Result(true, "删除成功");
         } catch (Exception e) {
             logger.error("商品删除发生错误,原因是:"+e);
@@ -125,6 +138,7 @@ public class GoodsController {
 
     /**
      * 运营商审核商品,改变商品状态
+     * 商品审核过后把商品存入solr库
      * @param ids --批量勾选的商品id
      * @param status --审核后的状态码
      * @return
@@ -133,11 +147,34 @@ public class GoodsController {
     public Result updateStatus(Long[] ids,String status) {
         try {
             goodsService.updateStatus(ids,status);
+            if ("1".equals(status)) {//如果审核通过
+                //查询此次审核通过的商品
+                List<TbItem> items = goodsService.findItemListByGoodsIdsAndStatus(ids, status);
+                //由于更新插入到索引库用的是list<SolrItem>，所以需要将查询到的TbItem数据封装到SolrItem中
+                if (items != null && items.size() > 0) {
+                    ArrayList<SolrItem> solrItemsList = new ArrayList<>();
+                    SolrItem solrItem = null;
+                    for (TbItem item : items) {
+                        solrItem = new SolrItem();
+                        //使用spring的BeanUtils深克隆对象
+                        BeanUtils.copyProperties(item, solrItem);
+                        //将spec字段中的json字符串转换为map
+                        Map specMap = JSON.parseObject(item.getSpec());
+                        solrItem.setSpecMap(specMap);
+                        solrItemsList.add(solrItem);
+                    }
+                    itemSearchService.importList(solrItemsList);
+                    logger.info("商品审核成功并且把数据存入solr索引库");
+                } else {
+                    logger.info("没有找到SKU数据");
+                }
+            }
             return new Result(true, "操作成功");
         } catch (Exception e) {
             logger.error("商品审核发生错误,原因是:"+e);
             return new Result(false, "操作失败");
         }
     }
+
 
 }

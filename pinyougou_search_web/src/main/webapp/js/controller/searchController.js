@@ -1,4 +1,4 @@
-app.controller('searchController',function($scope,searchService){
+app.controller('searchController',function($scope,$location,searchService){//添加location服务用于接收参数
 
     /**
      * 搜索对象
@@ -16,6 +16,13 @@ app.controller('searchController',function($scope,searchService){
             }
         );
     }
+
+    //加载查询字符串,首页跳转关键词查询
+    $scope.loadkeywords=function(){
+        $scope.searchMap.keywords=  $location.search()['keywords'];
+        $scope.search();
+    }
+
 
 
     //判断关键字是不是品牌
