@@ -213,11 +213,11 @@ public class ItemSearchServiceImpl implements ItemSearchService {
                 }
             }
             //4.4 分页查询
-            Integer pageNo = (Integer) searchMap.get("pageNo");//提取页码
+            Integer pageNo = new Integer((String) searchMap.get("pageNo")) ;//提取页码
             if (pageNo == null) {
                 pageNo = 1;//默认第一页
             }
-            Integer pageSize = (Integer) searchMap.get("pageSize");//每页记录数
+            Integer pageSize = new Integer((String) searchMap.get("pageSize")) ;//每页记录数
             if (pageSize == null) {
                 pageSize = 20;//默认20
             }

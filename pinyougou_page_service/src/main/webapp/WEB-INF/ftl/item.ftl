@@ -12,13 +12,19 @@
     <link rel="stylesheet" type="text/css" href="css/pages-item.css"/>
     <link rel="stylesheet" type="text/css" href="css/pages-zoom.css"/>
     <link rel="stylesheet" type="text/css" href="css/widget-cartPanelView.css"/>
+
+    <script type="text/javascript" src="plugins/angularjs/angular.min.js">  </script>
+    <script type="text/javascript" src="js/base.js">  </script>
+    <script type="text/javascript" src="js/controller/itemController.js">  </script>
+
 </head>
 
-<body>
+<body  ng-app="pinyougou" ng-controller="itemController" ng-init="num=1;loadSku()">
 
 <!--页面顶部 开始-->
 <#include "head.ftl"/>
 <!--页面顶部 结束-->
+<#--绑定数据-->
 <#--eval表示要转换图片列表的json字符串：数据库存的是json串-->
 <#assign imageList=goodsDesc.itemImages?eval />
 <#--扩展属性列表 -->
@@ -30,16 +36,10 @@
     <div id="item">
         <div class="crumb-wrap">
             <ul class="sui-breadcrumb">
-                <li>
-                    <a href="#">手机、数码、通讯</a>
-                </li>
-                <li>
-                    <a href="#">手机</a>
-                </li>
-                <li>
-                    <a href="#">Apple苹果</a>
-                </li>
-                <li class="active">iphone 6S系类</li>
+                <li><a href="#">${itemCat1}</a></li>
+                <li><a href="#">${itemCat2}</a></li>
+                <li><a href="#">${itemCat3}</a></li>
+               <#-- <li class="active">iphone 6S系类</li>-->
             </ul>
         </div>
         <!--product-info-->
@@ -65,15 +65,6 @@
                                     <#list imageList as item>
 			                            <li><img src="${item.url}" bimg="${item.url}" onmousemove="preview(this)"/></li>
                                     </#list>
-                            <#--<li><img src="img/_/s1.png" bimg="img/_/b1.png" onmousemove="preview(this)"/></li>
-                            <li><img src="img/_/s2.png" bimg="img/_/b2.png" onmousemove="preview(this)"/></li>
-                            <li><img src="img/_/s3.png" bimg="img/_/b3.png" onmousemove="preview(this)"/></li>
-                            <li><img src="img/_/s1.png" bimg="img/_/b1.png" onmousemove="preview(this)"/></li>
-                            <li><img src="img/_/s2.png" bimg="img/_/b2.png" onmousemove="preview(this)"/></li>
-                            <li><img src="img/_/s3.png" bimg="img/_/b3.png" onmousemove="preview(this)"/></li>
-                            <li><img src="img/_/s1.png" bimg="img/_/b1.png" onmousemove="preview(this)"/></li>
-                            <li><img src="img/_/s2.png" bimg="img/_/b2.png" onmousemove="preview(this)"/></li>
-                            <li><img src="img/_/s3.png" bimg="img/_/b3.png" onmousemove="preview(this)"/></li>-->
                             </ul>
                         </div>
                         <a class="next">&gt;</a>
@@ -82,7 +73,7 @@
             </div>
             <div class="fr itemInfo-wrap">
                 <div class="sku-name">
-                    <h4>${goods.goodsName}</h4>
+                    <h4>{{sku.title}}</h4>
                 </div>
                 <div class="news"><span>${goods.caption}</span></div>
                 <div class="summary">
@@ -92,7 +83,7 @@
                         </div>
                         <div class="fl price">
                             <i>¥</i>
-                            <em>${goods.price}</em>
+                            <em>{{sku.price}}</em>
                             <span>降价通知</span>
                         </div>
                         <div class="fr remark">
@@ -139,7 +130,8 @@
                                    </dt>
                                <#--<dd><a href="javascript:;" class="selected">金色<span title="点击取消选择">&nbsp;</span></a></dd>-->
                                   <#list spec.attributeValue as item>
-                                       <dd><a href="javascript:;">${item}</a></dd>
+                                       <dd><a href="javascript:;" class="{{isSelected('${specification.attributeName}','${item}')?'selected':''}}"
+                                            ng-click="selectSpecification('${specification.attributeName}','${item}')">${item}<span title="点击取消选择">&nbsp;</span></a></dd>
                                   </#list>
                                </dl>
                         </#list>
@@ -149,16 +141,16 @@
                         <div class="fl title">
                             <div class="control-group">
                                 <div class="controls">
-                                    <input autocomplete="off" type="text" value="1" minnum="1" class="itxt"/>
-                                    <a href="javascript:void(0)" class="increment plus">+</a>
-                                    <a href="javascript:void(0)" class="increment mins">-</a>
+                                    <input autocomplete="off" ng-click="num" type="text" value="1" minnum="1" class="itxt"/>
+                                    <a href="javascript:void(0)" ng-click="addNum(1)" class="increment plus">+</a>
+                                    <a href="javascript:void(0)" ng-click="addNum(-1)" class="increment mins">-</a>
                                 </div>
                             </div>
                         </div>
                         <div class="fl">
                             <ul class="btn-choose unstyled">
                                 <li>
-                                    <a href="cart.html" target="_blank" class="sui-btn  btn-danger addshopcar">加入购物车</a>
+                                    <a href="cart.html" ng-click="addToCart()" target="_blank" class="sui-btn  btn-danger addshopcar">加入购物车</a>
                                 </li>
                             </ul>
                         </div>

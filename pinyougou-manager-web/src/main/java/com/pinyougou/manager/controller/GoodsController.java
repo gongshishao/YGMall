@@ -152,7 +152,8 @@ public class GoodsController {
 
     /**
      * 运营商审核商品,改变商品状态
-     * 商品审核过后把商品存入solr库
+     *  1.商品审核过后把商品存入solr库
+     *  2.审核通过后还需要立即根据新增商品时填写的数据，生成静态页面到指定目录下
      * @param ids --批量勾选的商品id
      * @param status --审核后的状态码
      * @return
@@ -177,8 +178,13 @@ public class GoodsController {
                         solrItem.setSpecMap(specMap);
                         solrItemsList.add(solrItem);
                     }
+                    //1.同步索引库
                     itemSearchService.importList(solrItemsList);
-                    logger.info("商品审核成功并且把数据存入solr索引库");
+                    //2.生成静态页面
+                    for (Long goodsId : ids) {
+                        itemPageService.genItemHtml(goodsId);
+                    }
+                    logger.info("商品审核成功同步索引库+静态化商品详情页");
                 } else {
                     logger.info("没有找到SKU数据");
                 }
