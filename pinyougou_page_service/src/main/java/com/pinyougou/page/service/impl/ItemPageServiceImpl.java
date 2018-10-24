@@ -76,7 +76,14 @@ public class ItemPageServiceImpl implements ItemPageService {
             example.setOrderByClause("isDefault desc");//按默认降序，为了第一个选中默认的
             List<TbItem> itemList = itemMapper.selectByExample(example);
             dataModel.put("itemList", itemList);
-            //输出静态html
+            //输出静态html,注意，此处需要根据SPU循环遍历生成以SKU为名字的静态化页面
+            /*Writer out =null;
+            for (TbItem item : itemList) {
+                logger.error("sku总共有"+itemList.size());
+                out= new FileWriter(pagedir + item.getId() + ".html");
+                template.process(dataModel, out);
+            }
+            out.close();*/
             Writer out = new FileWriter(pagedir + goodsId + ".html");
             template.process(dataModel, out);
             out.close();

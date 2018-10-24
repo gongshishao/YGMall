@@ -103,8 +103,10 @@ public class GoodsServiceImpl implements GoodsService {
                     title += " " + iter.next().getValue();
                 }
                 item.setTitle(title);//设置商品标题
+                item.setStatus("1");//状态
                 //3.设置item
                 setItemValues(goods, item);
+
                 //9.保存SKU
                 itemMapper.insertSelective(item);
             }

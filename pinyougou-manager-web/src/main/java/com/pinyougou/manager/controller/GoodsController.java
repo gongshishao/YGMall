@@ -1,27 +1,25 @@
 package com.pinyougou.manager.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.pinyougou.page.service.ItemPageService;
+import com.pinyougou.pojo.TbGoods;
 import com.pinyougou.pojo.TbItem;
 import com.pinyougou.pojogroup.Goods;
 import com.pinyougou.search.service.ItemSearchService;
+import com.pinyougou.sellergoods.service.GoodsService;
+import entity.PageResult;
+import entity.Result;
 import entity.SolrItem;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.pinyougou.pojo.TbGoods;
-import com.pinyougou.sellergoods.service.GoodsService;
 
-import entity.PageResult;
-import entity.Result;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 请求处理器
@@ -40,7 +38,7 @@ public class GoodsController {
     @Reference
     private ItemSearchService itemSearchService;
 
-    @Reference(timeout=40000)
+    @Reference(timeout=100000)
     private ItemPageService itemPageService;
 
     /**
@@ -178,12 +176,13 @@ public class GoodsController {
                         solrItem.setSpecMap(specMap);
                         solrItemsList.add(solrItem);
                     }
-                    //1.同步索引库
-                    itemSearchService.importList(solrItemsList);
                     //2.生成静态页面
                     for (Long goodsId : ids) {
                         itemPageService.genItemHtml(goodsId);
                     }
+                    //1.同步索引库
+                    itemSearchService.importList(solrItemsList);
+
                     logger.info("商品审核成功同步索引库+静态化商品详情页");
                 } else {
                     logger.info("没有找到SKU数据");

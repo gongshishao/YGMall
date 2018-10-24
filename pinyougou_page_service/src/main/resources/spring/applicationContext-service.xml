@@ -13,7 +13,6 @@
     <dubbo:application name="pinyougou_page_service"/>
     <dubbo:registry address="zookeeper://192.168.25.129:2181"/>
     <dubbo:annotation package="com.pinyougou.page.service.impl"/>
-    <dubbo:provider timeout="5000"/>
 
     <!--配置FreeMarkerConfigurer-->
     <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">

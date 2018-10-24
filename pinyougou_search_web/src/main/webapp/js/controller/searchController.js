@@ -12,7 +12,7 @@ app.controller('searchController',function($scope,$location,searchService){//添
             function(response){
                 //搜索返回的结果
                 $scope.resultMap=response;
-                buildPageLabel();//调用
+                buildPageLabel();//调用构建分页
             }
         );
     }

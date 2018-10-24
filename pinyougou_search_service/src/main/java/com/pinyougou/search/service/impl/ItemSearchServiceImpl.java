@@ -74,7 +74,7 @@ public class ItemSearchServiceImpl implements ItemSearchService {
      */
     @Override
     public void importList(List list) {
-        solrTemplate.saveBean(list);
+        solrTemplate.saveBeans(list);
         solrTemplate.commit();
     }
 
@@ -154,8 +154,7 @@ public class ItemSearchServiceImpl implements ItemSearchService {
      */
     private Map searchList(Map searchMap) {
         Map map = new HashMap();
-        String keywords = (String) searchMap.get("keywords");
-        if (StringUtils.isNotBlank(keywords)) {
+        if (searchMap.get("keywords") != null) {
             //1.构建query高亮查询对象new SimpleHighlightQuery
             HighlightQuery query = new SimpleHighlightQuery();
 
@@ -166,7 +165,7 @@ public class ItemSearchServiceImpl implements ItemSearchService {
             query.setHighlightOptions(options);
 
             //3.组装查询条件，搜索框输入关键字查询
-            Criteria criteria = new Criteria("item_keywords").is(keywords);
+            Criteria criteria = new Criteria("item_keywords").is(searchMap.get("keywords"));
             query.addCriteria(criteria);
 
             //4.添加其他查询条件
@@ -213,11 +212,11 @@ public class ItemSearchServiceImpl implements ItemSearchService {
                 }
             }
             //4.4 分页查询
-            Integer pageNo = new Integer((String) searchMap.get("pageNo")) ;//提取页码
+            Integer pageNo= (Integer) searchMap.get("pageNo");//提取页码
             if (pageNo == null) {
                 pageNo = 1;//默认第一页
             }
-            Integer pageSize = new Integer((String) searchMap.get("pageSize")) ;//每页记录数
+            Integer pageSize= (Integer) searchMap.get("pageSize");//每页记录数
             if (pageSize == null) {
                 pageSize = 20;//默认20
             }

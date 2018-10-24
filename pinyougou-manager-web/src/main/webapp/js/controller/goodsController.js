@@ -1,9 +1,9 @@
 //控制层
-app.controller('goodsController', function ($scope, $controller, goodsService,itemCatService) {
+app.controller('goodsController', function ($scope, $controller,$location, goodsService,itemCatService,typeTemplateService) {
 
     $controller('baseController', {$scope: $scope});//继承
 
-    //读取列表数据绑定到表单中  
+    //读取列表数据绑定到表单中
     $scope.findAll = function () {
         goodsService.findAll().success(
             function (response) {
@@ -109,10 +109,62 @@ app.controller('goodsController', function ($scope, $controller, goodsService,it
         );
     }
 
+    //*****************************实现商品选择(三级分类)********************
+    //查询一级分类
+    $scope.selectItemCat1List = function () {
+        itemCatService.findByParentId(0).success(function (response) {
+            $scope.itemCat1List = response;
+        })
+    }
+
+    //根据一级类目，更新二级类目
+    //$watch方法用于监控某个变量的值，当被监控的值发生变化，就自动执行相应的函数
+    $scope.$watch("entity.goods.category1Id", function (newValue, oldValue) {
+        itemCatService.findByParentId(newValue).success(function (response) {
+            $scope.itemCat2List = response;
+        })
+    })
+
+    //根据二级类目，更新三级类目
+    $scope.$watch("entity.goods.category2Id", function (newValue, oldValue) {
+        itemCatService.findByParentId(newValue).success(function (response) {
+            $scope.itemCat3List = response;
+        })
+    })
+
+    //选择三级类目后，更新模板id
+    //$watch方法用于监控某个变量的值，当被监控的值发生变化，就自动执行相应的函数
+    $scope.$watch("entity.goods.category3Id", function (newValue, oldValue) {
+        itemCatService.findOne(newValue).success(function (response) {
+            $scope.entity.goods.typeTemplateId = response.typeId;
+        })
+    });
+
+    //根据模板id，更新品牌列表,扩展属性,规格列表
+    $scope.$watch("entity.goods.typeTemplateId", function (newValue, oldValue) {
+
+        typeTemplateService.findOne(newValue).success(function (response) {
+            $scope.typeTemplate = response;
+            $scope.typeTemplate.brandIds = JSON.parse(response.brandIds);
+
+            //在用户更新模板ID时，读取模板中的扩展属性赋给商品的扩展属性。
+            //如果没有ID，则加载模板中的扩展数据 ==>解决与findOne中回显读取数据发生冲突的问题
+            if ($location.search()['id'] == null) {
+                $scope.entity.goodsDesc.customAttributeItems = JSON.parse(response.customAttributeItems);
+            }
+            //获得规格列表
+            typeTemplateService.findSpecList(newValue).success(
+                function (response) {
+                    $scope.specList = response;
+                }
+            );
+        })
+    });
+
     /**
      * 更新商品状态
      */
-    $scope.updateStatus=function () {
+    $scope.updateStatus=function (status) {
         goodsService.updateStatus($scope.selectIds,status).success(function (response) {
             alert(response.message);
             //如果修改成功

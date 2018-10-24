@@ -1,1 +1,2 @@
-var app=angular.module('pinyougou',[]);//定义不分页的模板
+// 定义模块:
+var app = angular.module("pinyougou",[]);
