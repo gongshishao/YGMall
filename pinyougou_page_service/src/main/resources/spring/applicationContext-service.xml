@@ -7,12 +7,13 @@
         http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-
+    <!--扫描包-->
+    <context:component-scan base-package="com.pinyougou.page.service.impl"/>
     <!--作为dubbo服务中心生产者,默认为20880-->
-    <dubbo:protocol name="dubbo" port="20884"></dubbo:protocol>
+    <!--<dubbo:protocol name="dubbo" port="20884"></dubbo:protocol>
     <dubbo:application name="pinyougou_page_service"/>
     <dubbo:registry address="zookeeper://192.168.25.129:2181"/>
-    <dubbo:annotation package="com.pinyougou.page.service.impl"/>
+    <dubbo:annotation package="com.pinyougou.page.service.impl"/>-->
 
     <!--配置FreeMarkerConfigurer-->
     <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">

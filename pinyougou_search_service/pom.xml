@@ -93,6 +93,13 @@
             <artifactId>pinyougou-common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!--引入消息队列，作为运营商后台消费者-->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
+            <version>5.14.5</version>
+        </dependency>
+
 
 
     </dependencies>

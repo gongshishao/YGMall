@@ -31,7 +31,7 @@ public class ItemSearchServiceImpl implements ItemSearchService {
     private SolrTemplate solrTemplate;
 
     @Autowired
-    private RedisTemplate redisTemplate;
+       private RedisTemplate redisTemplate;
 
     /**
      * 搜索核心方法，需要实现以下优化

@@ -91,18 +91,24 @@
             <artifactId>pinyougou_content_interface</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <!--依赖搜索interface-->
-        <dependency>
+        <!--依赖搜索interface，已通过activemq消息总线解耦-->
+        <!--<dependency>
             <groupId>com.pinyougou</groupId>
             <artifactId>pinyougou_search_interface</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <!--依赖静态化页面interface-->
-        <dependency>
+        </dependency>-->
+        <!--依赖静态化页面interface,已通过activemq消息总线解耦-->
+        <!--<dependency>
             <groupId>com.pinyougou</groupId>
             <artifactId>pinyougou_page_interface</artifactId>
             <version>1.0-SNAPSHOT</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
+            <version>5.14.5</version>
         </dependency>
+
         <!--依赖common-->
         <dependency>
             <groupId>com.pinyougou</groupId>

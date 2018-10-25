@@ -2,27 +2,29 @@ package com.pinyougou.manager.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
-import com.pinyougou.page.service.ItemPageService;
 import com.pinyougou.pojo.TbGoods;
 import com.pinyougou.pojo.TbItem;
 import com.pinyougou.pojogroup.Goods;
-import com.pinyougou.search.service.ItemSearchService;
 import com.pinyougou.sellergoods.service.GoodsService;
 import entity.PageResult;
 import entity.Result;
-import entity.SolrItem;
 import org.apache.log4j.Logger;
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 请求处理器
+ * 商品管理控制层，商品审核通过后同步索引库及生成静态化页面，使用activemq解耦
  *
  * @author Steven
  */
@@ -35,21 +37,34 @@ public class GoodsController {
     @Reference
     private GoodsService goodsService;
 
-    @Reference
-    private ItemSearchService itemSearchService;
+    //同步索引库，已通过activemq解耦
+    //@Reference
+    //private ItemSearchService itemSearchService;
+    //注入消息模板和队列
+    @Autowired
+    private Destination queueSolrDestination;
+    @Autowired
+    private Destination queueSolrDeleteDestination;
 
-    @Reference(timeout=100000)
-    private ItemPageService itemPageService;
+    @Autowired
+    private Destination topicPageDestination;
+    @Autowired
+    private Destination topicPageDeleteDestination;
+
+    @Autowired
+    private JmsTemplate jmsTemplate;
+
+    //@Reference(timeout=100000)
+    //private ItemPageService itemPageService;
 
     /**
      * 生成静态页（测试）
      * @param goodsId
      */
-    @RequestMapping("/genHtml")
+   /* @RequestMapping("/genHtml")
     public boolean genHtml(Long goodsId) {
         return itemPageService.genItemHtml(goodsId);
-    }
-
+    }*/
 
     /**
      * 返回全部列表
@@ -123,15 +138,79 @@ public class GoodsController {
      * @return
      */
     @RequestMapping("/delete")
-    public Result delete(Long[] ids) {
+    public Result delete(final Long[] ids) {
         try {
             goodsService.delete(ids);
-            itemSearchService.deleteByGoodsIds(ids);
-            logger.info("删除商品同步删除索引");
+            //从索引库中删除
+            //itemSearchService.deleteByGoodsIds(Arrays.asList(ids));
+            jmsTemplate.send(queueSolrDeleteDestination, new MessageCreator() {
+                @Override
+                public Message createMessage(Session session) throws JMSException {
+                    return session.createObjectMessage(ids);
+                }
+            });
+            //删除商品详情页
+            jmsTemplate.send(topicPageDeleteDestination, new MessageCreator() {
+                @Override
+                public Message createMessage(Session session) throws JMSException {
+                    //发送序列化对象消息
+                    return session.createObjectMessage(ids);
+                }
+            });
+
+
+            logger.info("删除商品同步删除索引+删除静态页面");
             return new Result(true, "删除成功");
         } catch (Exception e) {
-            logger.error("商品删除发生错误,原因是:"+e);
+            logger.error("商品删除发生错误,原因是:" + e);
             return new Result(false, "删除失败");
+        }
+    }
+
+    /**
+     * 运营商审核商品,改变商品状态
+     * 1.商品审核过后把商品存入solr库
+     * 2.审核通过后还需要立即根据新增商品时填写的数据，生成静态页面到指定目录下
+     *
+     * @param ids    --批量勾选的商品id
+     * @param status --审核后的状态码
+     * @return
+     */
+    @RequestMapping("updateStatus")
+    public Result updateStatus(Long[] ids, String status) {
+        try {
+            goodsService.updateStatus(ids, status);
+            if ("1".equals(status)) {//如果审核通过
+                //查询此次审核通过的商品，传递SKU
+                List<TbItem> items = goodsService.findItemListByGoodsIdsAndStatus(ids, status);
+                //1.同步索引库，已通过activemq解耦
+                /*itemSearchService.importList(solrItemsList);*/
+                //把sku数据作为消息发送到队列
+                final String jsonString = JSON.toJSONString(items);
+                jmsTemplate.send(queueSolrDestination, new MessageCreator() {
+                    @Override
+                    public Message createMessage(Session session) throws JMSException {
+                        return session.createTextMessage(jsonString);
+                    }
+                });
+                //2.生成静态页面，传递SPU的ids
+               /* for (Long goodsId : ids) {
+                    itemPageService.genItemHtml(goodsId);
+                }*/
+                final Long[] goodsIds = ids;
+                jmsTemplate.send(topicPageDestination, new MessageCreator() {
+                    @Override
+                    public Message createMessage(Session session) throws JMSException {
+                        return session.createObjectMessage(goodsIds);
+                    }
+                });
+
+                logger.info("通过activemq消息队列实现，商品审核成功后同步索引库+静态化商品详情页");
+            }
+            return new Result(true, "操作成功");
+        } catch (Exception e) {
+            logger.error("商品审核发生错误,原因是:" + e);
+            return new Result(false, "操作失败");
         }
     }
 
@@ -147,53 +226,5 @@ public class GoodsController {
     public PageResult search(@RequestBody TbGoods goods, int page, int rows) {
         return goodsService.findPage(goods, page, rows);
     }
-
-    /**
-     * 运营商审核商品,改变商品状态
-     *  1.商品审核过后把商品存入solr库
-     *  2.审核通过后还需要立即根据新增商品时填写的数据，生成静态页面到指定目录下
-     * @param ids --批量勾选的商品id
-     * @param status --审核后的状态码
-     * @return
-     */
-    @RequestMapping("updateStatus")
-    public Result updateStatus(Long[] ids,String status) {
-        try {
-            goodsService.updateStatus(ids,status);
-            if ("1".equals(status)) {//如果审核通过
-                //查询此次审核通过的商品
-                List<TbItem> items = goodsService.findItemListByGoodsIdsAndStatus(ids, status);
-                //由于更新插入到索引库用的是list<SolrItem>，所以需要将查询到的TbItem数据封装到SolrItem中
-                if (items != null && items.size() > 0) {
-                    ArrayList<SolrItem> solrItemsList = new ArrayList<>();
-                    SolrItem solrItem = null;
-                    for (TbItem item : items) {
-                        solrItem = new SolrItem();
-                        //使用spring的BeanUtils深克隆对象
-                        BeanUtils.copyProperties(item, solrItem);
-                        //将spec字段中的json字符串转换为map
-                        Map specMap = JSON.parseObject(item.getSpec());
-                        solrItem.setSpecMap(specMap);
-                        solrItemsList.add(solrItem);
-                    }
-                    //2.生成静态页面
-                    for (Long goodsId : ids) {
-                        itemPageService.genItemHtml(goodsId);
-                    }
-                    //1.同步索引库
-                    itemSearchService.importList(solrItemsList);
-
-                    logger.info("商品审核成功同步索引库+静态化商品详情页");
-                } else {
-                    logger.info("没有找到SKU数据");
-                }
-            }
-            return new Result(true, "操作成功");
-        } catch (Exception e) {
-            logger.error("商品审核发生错误,原因是:"+e);
-            return new Result(false, "操作失败");
-        }
-    }
-
 
 }

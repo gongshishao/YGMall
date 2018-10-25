@@ -8,6 +8,7 @@
         http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
+    <context:component-scan base-package="com.pinyougou.search.service.impl"/>
     <!--作为dubbo服务中心生产者,默认为20880-->
     <dubbo:protocol name="dubbo" port="20883"></dubbo:protocol>
     <dubbo:application name="pinyougou_search_service"/>
