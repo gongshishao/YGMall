@@ -8,12 +8,15 @@ import com.pinyougou.pojo.TbOrderItem;
 import com.pinyougou.pojogroup.Cart;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 购物车服务实现类,从redis中查询是否有购物车并进行购物车合并，删除未登录时存在cookie中的购物车信息
+ * redis中存的键为cartList
  * @author admin13
  * @version 1.0
  * @description com.pinyougou.cart.service.impl
@@ -25,6 +28,34 @@ public class CartServiceImpl implements CartService {
     private Logger logger = Logger.getLogger(CartServiceImpl.class);
     @Autowired
     private TbItemMapper itemMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    /**
+     * 从redis中取出数据
+     * @param username
+     * @return
+     */
+    @Override
+    public List<Cart> findCartListFromRedis(String username) {
+        logger.info("尝试从redis中获取购物车信息"+username);
+        List<Cart> cartList = (List<Cart>) redisTemplate.boundHashOps("cartList").get(username);
+        if(cartList==null){
+            cartList=new ArrayList();
+        }
+        return cartList;
+    }
+
+    /**
+     * 将购物车信息存入购物车
+     * @param username
+     * @param cartList
+     */
+    @Override
+    public void saveCartListToRedis(String username, List<Cart> cartList) {
+        logger.info("向redis中存入数据");
+        redisTemplate.boundHashOps("cartList").put(username, cartList);
+    }
 
     /**
      * 添加商品到购物车列表
@@ -83,6 +114,16 @@ public class CartServiceImpl implements CartService {
 
         }
         return cartList;
+    }
+
+    @Override
+    public List<Cart> mergeCartList(List<Cart> cartList1, List<Cart> cartList2) {
+        for (Cart cart : cartList2) {
+            for (TbOrderItem item : cart.getOrderItemList()) {
+                this.addGoodsToCartList(cartList1, item.getItemId(), item.getNum());
+            }
+        }
+        return cartList1;
     }
 
     /**
