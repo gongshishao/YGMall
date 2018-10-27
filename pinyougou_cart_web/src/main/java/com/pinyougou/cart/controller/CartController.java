@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -77,6 +78,7 @@ public class CartController {
      * @return
      */
     @RequestMapping("addGoodsToCartList")
+    @CrossOrigin(origins = "http://localhost:8085",allowCredentials = "true")//设置要访问该方法的域地址，允许凭证（cookie可以不写）
     public Result addGoodsToCartList(Long itemId, Integer num) {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
